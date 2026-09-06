@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prythian, Remembered</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg-deep: #0a0d1c;
+    --bg-surface: #141a30;
+    --bg-surface-2: #1d2440;
+    --gold: #c9a227;
+    --gold-soft: #e3c568;
+    --lilac: #a596d6;
+    --rose: #c06b82;
+    --text-primary: #edeaf6;
+    --text-muted: #9491ac;
+    --border: rgba(197, 191, 226, 0.14);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  .starfield {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(1.5px 1.5px at 20% 30%, rgba(237,234,246,0.6), transparent),
+      radial-gradient(1px 1px at 70% 15%, rgba(237,234,246,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 85% 60%, rgba(237,234,246,0.4), transparent),
+      radial-gradient(1px 1px at 40% 80%, rgba(237,234,246,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 55% 45%, rgba(237,234,246,0.3), transparent),
+      radial-gradient(1px 1px at 10% 65%, rgba(237,234,246,0.4), transparent),
+      radial-gradient(1.5px 1.5px at 92% 85%, rgba(237,234,246,0.5), transparent);
+    background-repeat: repeat;
+    background-size: 100% 100%;
+    animation: twinkle 6s ease-in-out infinite alternate;
+  }
+  @media (prefers-reduced-motion: reduce) { .starfield { animation: none; } }
+  @keyframes twinkle { from { opacity: 0.5; } to { opacity: 1; } }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  header { text-align: center; margin-bottom: 20px; }
+
+  .eyebrow {
+    font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold-soft); margin: 0 0 10px; font-weight: 600;
+  }
+  h1 {
+    font-family: 'Cormorant Garamond', serif; font-weight: 600;
+    font-size: 46px; margin: 0 0 10px; letter-spacing: 0.5px;
+  }
+  .subtitle { color: var(--text-muted); font-size: 15px; margin: 0; }
+
+  .view-switch {
+    display: flex; justify-content: center; gap: 0; margin: 28px auto 32px; max-width: 420px;
+    border: 1px solid var(--border); border-radius: 24px; padding: 4px; background: var(--bg-surface);
+  }
+  .view-btn {
+    flex: 1; background: none; border: none; color: var(--text-muted);
+    padding: 11px 18px; border-radius: 20px; font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: 16px; cursor: pointer; transition: all 0.2s;
+  }
+  .view-btn:hover { color: var(--text-primary); }
+  .view-btn.active { background: var(--bg-surface-2); color: var(--gold-soft); box-shadow: 0 0 0 1px var(--gold-soft) inset; }
+
+  #book-view-wrap.hidden, #arcs-view-wrap.hidden { display: none; }
+  #arcs-view-wrap { margin-bottom: 28px; }
+
+  .cast-toggle-wrap { text-align: center; margin: 22px 0 28px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  #cast-toggle, #setting-toggle {
+    background: none; border: 1px solid var(--border); color: var(--gold-soft);
+    padding: 10px 22px; border-radius: 20px; font-family: 'Inter', sans-serif;
+    font-size: 13px; cursor: pointer; transition: all 0.2s;
+  }
+  #cast-toggle:hover, #setting-toggle:hover { background: var(--bg-surface); }
+
+  #setting-panel { margin: -8px 0 28px; }
+  #setting-panel.hidden { display: none; }
+  #setting-panel .card p { margin: 0; }
+
+  .beyond-toggle-wrap { text-align: center; margin: 0 0 22px; }
+  #beyond-toggle {
+    background: none; border: 1px solid var(--border); color: var(--gold-soft);
+    padding: 10px 22px; border-radius: 20px; font-family: 'Inter', sans-serif;
+    font-size: 13px; cursor: pointer; transition: all 0.2s;
+  }
+  #beyond-toggle:hover { background: var(--bg-surface); }
+  #beyond-panel { margin: -8px 0 28px; }
+  #beyond-panel.hidden { display: none; }
+  .beyond-card {
+    max-width: 560px; margin: 0 auto 12px; background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 18px;
+  }
+  .bp-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; color: var(--gold-soft); margin: 0 0 3px; }
+  .bp-source { font-size: 11px; color: var(--text-muted); letter-spacing: 0.3px; margin: 0 0 8px; text-transform: uppercase; }
+  .beyond-card p:not(.bp-name):not(.bp-source) { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin: 0; }
+  .beyond-card em { color: var(--text-primary); font-style: italic; }
+  .bp-footnote { max-width: 560px; margin: 10px auto 0; text-align: center; font-size: 12px; color: var(--text-muted); font-style: italic; font-family: 'Cormorant Garamond', serif; }
+  .crossover-note {
+    display: block; margin-top: 8px; padding: 8px 12px; border-left: 2px solid var(--gold-soft);
+    background: rgba(201,162,39,0.08); font-size: 12.5px; color: var(--text-muted); font-style: italic; line-height: 1.5;
+  }
+
+  .arc-person-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 14px; }
+  .arc-person-chip {
+    background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-muted);
+    padding: 7px 14px; border-radius: 14px; font-family: 'Cormorant Garamond', serif; font-size: 15px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .arc-person-chip:hover { color: var(--text-primary); }
+  .arc-person-chip.active { background: rgba(201,162,39,0.14); border-color: var(--gold-soft); color: var(--gold-soft); }
+  .arc-facet-row { display: flex; justify-content: center; gap: 4px; margin-bottom: 14px; }
+  .arc-facet-btn {
+    background: none; border: 1px solid var(--border); color: var(--text-muted);
+    padding: 6px 14px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .arc-facet-btn.active { background: var(--bg-surface-2); color: var(--gold-soft); border-color: var(--gold-soft); }
+
+  #cast-panel {
+    margin: 0 0 28px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  #cast-panel.hidden { display: none; }
+  .cast-card {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .cast-card .name { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 600; color: var(--gold-soft); margin: 0 0 2px; }
+  .cast-card .role { font-size: 11px; color: var(--text-muted); margin: 0 0 8px; letter-spacing: 0.3px; }
+  .cast-card .trait { font-size: 13px; margin: 0 0 6px; color: var(--text-primary); }
+  .cast-card .note { font-size: 12.5px; color: var(--text-muted); margin: 0; line-height: 1.5; }
+
+  .cast-section-label {
+    grid-column: 1 / -1;
+    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--gold-soft); font-weight: 700; margin: 10px 0 2px;
+  }
+  .cast-section-label:first-child { margin-top: 0; }
+  .cast-empty {
+    grid-column: 1 / -1; font-size: 13px; color: var(--text-muted); font-style: italic;
+    font-family: 'Cormorant Garamond', serif; margin: 0 0 4px;
+  }
+  .returning-row {
+    grid-column: 1 / -1;
+    display: flex; gap: 10px; padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .returning-row:last-of-type { border-bottom: none; }
+  .returning-row .rname {
+    flex: 0 0 130px; color: var(--gold-soft); font-family: 'Cormorant Garamond', serif;
+    font-size: 15px; font-weight: 600;
+  }
+  .returning-row .rchange { color: var(--text-muted); line-height: 1.5; }
+
+  .book-tabs {
+    display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;
+    margin: 0 0 20px; border-bottom: 1px solid var(--border); padding-bottom: 0;
+  }
+  .book-tab {
+    background: none; border: none; color: var(--text-muted);
+    font-family: 'Cormorant Garamond', serif; font-size: 17px; padding: 10px 14px;
+    cursor: pointer; position: relative; transition: color 0.2s; text-align: center; line-height: 1.3;
+  }
+  .book-tab .numeral { display: block; font-size: 20px; font-weight: 600; }
+  .book-tab .label { display: block; font-size: 11px; font-family: 'Inter', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+  .book-tab:hover { color: var(--text-primary); }
+  .book-tab.active { color: var(--gold-soft); }
+  .book-tab.active::after {
+    content: ''; position: absolute; bottom: -1px; left: 10%; right: 10%; height: 2px;
+    background: var(--gold-soft); box-shadow: 0 0 8px var(--gold-soft);
+  }
+
+  .mode-toggle { display: flex; justify-content: center; gap: 4px; margin-bottom: 14px; }
+  .mode-btn {
+    background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-muted);
+    padding: 9px 20px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .mode-btn:first-child { border-radius: 20px 0 0 20px; }
+  .mode-btn:last-child { border-radius: 0 20px 20px 0; border-left: none; }
+  .mode-btn.active { background: var(--bg-surface-2); color: var(--gold-soft); }
+
+  .depth-toggle { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .depth-description {
+    text-align: center; font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: 14px; color: var(--text-muted); margin: 0 0 24px;
+  }
+
+  #helper-wrap { text-align: center; margin-bottom: 14px; }
+  .helper-link {
+    background: none; border: none; color: var(--lilac); font-family: 'Inter', sans-serif;
+    font-size: 12.5px; text-decoration: underline; text-underline-offset: 3px;
+    cursor: pointer; padding: 4px;
+  }
+  .helper-link:hover { color: var(--gold-soft); }
+  .helper-card {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px; max-width: 480px; margin: 0 auto;
+  }
+  .helper-card p.helper-q {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px;
+    color: var(--text-primary); margin: 0 0 12px;
+  }
+  .helper-options { display: flex; flex-direction: column; gap: 6px; }
+  .helper-option {
+    background: var(--bg-surface-2); border: 1px solid var(--border); color: var(--text-primary);
+    padding: 9px 14px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 13px;
+    text-align: left; cursor: pointer; transition: all 0.2s;
+  }
+  .helper-option:hover { border-color: var(--gold-soft); color: var(--gold-soft); }
+  .helper-close {
+    background: none; border: none; color: var(--text-muted); font-size: 12px;
+    margin-top: 10px; cursor: pointer; text-decoration: underline;
+  }
+  .depth-btn {
+    background: none; border: 1px solid var(--border); color: var(--text-muted);
+    padding: 6px 14px; border-radius: 14px; font-family: 'Inter', sans-serif; font-size: 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .depth-btn:hover { color: var(--text-primary); }
+  .depth-btn.active { background: rgba(201,162,39,0.14); border-color: var(--gold-soft); color: var(--gold-soft); }
+
+  /* Timeline depth */
+  .timeline-track { position: relative; padding-left: 22px; }
+  .timeline-track::before {
+    content: ''; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 1px;
+    background: var(--border);
+  }
+  .timeline-phase-label {
+    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-soft);
+    font-weight: 700; margin: 18px 0 8px; position: relative;
+  }
+  .timeline-phase-label:first-child { margin-top: 0; }
+  .timeline-item { position: relative; margin-bottom: 12px; }
+  .timeline-item p { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--text-primary); }
+  .timeline-dot {
+    position: absolute; left: -22px; top: 6px; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--gold-soft); box-shadow: 0 0 6px rgba(201,162,39,0.5);
+  }
+
+  /* Character drill-down chips */
+  .char-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .char-chip {
+    background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-muted);
+    padding: 6px 13px; border-radius: 14px; font-family: 'Inter', sans-serif; font-size: 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .char-chip:hover { color: var(--text-primary); }
+  .char-chip.active { background: rgba(201,162,39,0.14); border-color: var(--gold-soft); color: var(--gold-soft); }
+
+  .book-heading { text-align: center; margin-bottom: 22px; }
+  .book-heading h2 { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 26px; margin: 0; color: var(--text-primary); }
+  .book-heading p { color: var(--text-muted); font-size: 13px; margin: 4px 0 0; }
+
+  .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; margin-bottom: 16px; }
+  .card h3 { font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-soft); margin: 0 0 12px; font-weight: 700; }
+  .card p { margin: 0 0 10px; font-size: 15px; line-height: 1.65; color: var(--text-primary); }
+  .card p:last-child { margin-bottom: 0; }
+  .card ul { margin: 0; padding-left: 18px; }
+  .card li { font-size: 15px; line-height: 1.65; margin-bottom: 8px; color: var(--text-primary); }
+  .card li::marker { color: var(--gold-soft); }
+  .card.cliffhanger { border-color: rgba(201,162,39,0.35); background: linear-gradient(180deg, var(--bg-surface), var(--bg-surface-2)); }
+
+  /* Listen mode player */
+  .player-bar {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .player-btn {
+    background: var(--bg-surface-2); border: 1px solid var(--border); color: var(--gold-soft);
+    padding: 9px 18px; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 13px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .player-btn:hover { background: rgba(201,162,39,0.14); }
+  .player-btn.stop { color: var(--rose); }
+  .player-note { text-align: center; font-size: 11.5px; color: var(--text-muted); margin: 0 0 16px; }
+
+  .transcript { display: flex; flex-direction: column; gap: 14px; }
+  .line { max-width: 82%; display: flex; flex-direction: column; transition: opacity 0.2s; }
+  .line.wren { align-self: flex-start; }
+  .line.sol { align-self: flex-end; align-items: flex-end; }
+  .speaker { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+  .line.wren .speaker { color: var(--lilac); }
+  .line.sol .speaker { color: var(--rose); }
+  .bubble {
+    padding: 12px 16px; border-radius: 14px; font-size: 14.5px; line-height: 1.55;
+    background: var(--bg-surface); border: 1px solid var(--border); transition: all 0.2s;
+  }
+  .line.wren .bubble { border-top-left-radius: 4px; }
+  .line.sol .bubble { border-top-right-radius: 4px; background: var(--bg-surface-2); }
+  .line.speaking .bubble { border-color: var(--gold-soft); box-shadow: 0 0 0 1px var(--gold-soft), 0 0 16px rgba(201,162,39,0.25); }
+
+  footer { text-align: center; margin-top: 48px; color: var(--text-muted); font-style: italic; font-family: 'Cormorant Garamond', serif; font-size: 15px; }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 34px; }
+    .book-tab { font-size: 14px; padding: 8px 8px; }
+    .book-tab .numeral { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="starfield"></div>
+<div class="app">
+  <header>
+    <p class="eyebrow">A personal refresher · v11</p>
+    <h1>Prythian, Remembered</h1>
+    <p class="subtitle">Books I&ndash;V of A Court of Thorns and Roses, before Book VI arrives</p>
+  </header>
+
+  <div class="view-switch" id="viewSwitch">
+    <button class="view-btn active" data-view="book">Explore a Book</button>
+    <button class="view-btn" data-view="arcs">Follow a Character</button>
+  </div>
+
+  <div class="beyond-toggle-wrap">
+    <button id="beyond-toggle">Beyond Prythian</button>
+  </div>
+  <div id="beyond-panel" class="hidden">
+    <p class="cast-section-label" style="text-align:center; display:block;">Small nods to the wider Maasverse</p>
+    <p style="text-align:center; font-size:12.5px; color:var(--text-muted); font-style:italic; font-family:'Cormorant Garamond',serif; margin:4px 0 16px;">
+      Throne of Glass and Crescent City live outside these five ACOTAR books. Treat the Crescent City one as a light spoiler for that series.
+    </p>
+    <div class="beyond-card">
+      <p class="bp-name">Bryce Quinlan arrives in Prythian</p>
+      <p class="bp-source">Crescent City, Book 2 (House of Sky and Breath) &amp; Book 3 (House of Flame and Shadow)</p>
+      <p>At the end of <em>House of Sky and Breath</em>, Bryce Quinlan steps through a gate to escape her own world — and lands in the Night Court, face to face with Rhysand and Azriel. It isn't a wink or a cameo; she's really there, and <em>House of Flame and Shadow</em> follows her through Prythian as she learns her own "starborn" power connects to magic that runs through this world too.</p>
+    </div>
+    <div class="beyond-card">
+      <p class="bp-name">A glimpse at Starfall</p>
+      <p class="bp-source">Throne of Glass, Book 7 (Kingdom of Ash)</p>
+      <p>While falling between worlds, Aelin glimpses a winged Fae male embracing his pregnant wife. Readers have long read this as Rhysand and Feyre — and the detail is stranger for the timing: <em>Kingdom of Ash</em> published years before <em>A Court of Silver Flames</em> confirmed Feyre's pregnancy with Nyx.</p>
+    </div>
+    <p class="bp-footnote">This is a small, curated set — not a full map of the Maasverse. Watch for a &#10022; note where these moments connect to something in Prythian's own story.</p>
+  </div>
+
+  <div id="book-view-wrap">
+    <div class="cast-toggle-wrap">
+      <button id="cast-toggle">Open the Cast &mdash; who's who</button>
+      <button id="setting-toggle">Where We Are</button>
+    </div>
+    <div id="cast-panel" class="hidden"></div>
+    <div id="setting-panel" class="hidden"></div>
+
+    <nav class="book-tabs" id="bookTabs"></nav>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="read">Read the recap</button>
+      <button class="mode-btn" data-mode="listen">Listen in</button>
+    </div>
+
+    <div id="helper-wrap"></div>
+
+    <div class="depth-toggle" id="depthToggle"></div>
+    <p class="depth-description" id="depthDescription"></p>
+
+    <div class="book-heading" id="bookHeading"></div>
+
+    <main id="content"></main>
+  </div>
+
+  <div id="arcs-view-wrap" class="hidden">
+    <div id="arcs-panel"></div>
+  </div>
+
+  <footer>&ldquo;To the stars who listen&mdash;and the dreams that are answered.&rdquo;</footer>
+</div>
+
+<script>
+const books = [
+{
+  numeral: 'I', label: 'Thorns & Roses', title: 'A Court of Thorns and Roses',
+  depths: {
+    high: {
+      read: "Feyre, a human huntress, kills a faerie disguised as a wolf and is taken to the Spring Court as payment under an old treaty. She falls for Tamlin, its High Lord, while uncovering a curse driven by the faerie queen Amarantha, who's holding all seven High Lords hostage. To save Tamlin, Feyre survives three deadly trials, dies completing them, and is resurrected as High Fae by the combined power of all seven High Lords.",
+      listen: [
+        {who:'wren', text:"Fastest version of book one: human girl kills a faerie wolf, gets taken as payment, falls for the High Lord holding her."},
+        {who:'sol', text:"Turns out his whole court is cursed by a queen named Amarantha, who's got every High Lord in Prythian trapped."},
+        {who:'wren', text:"Feyre does three deadly trials to save him, dies doing it, and all seven High Lords bring her back as High Fae."},
+        {who:'sol', text:"So she starts book two alive, powerful, and owing a certain Night Court High Lord a favor."}
+      ]
+    },
+    detailed: {
+      read: {
+        situation: "Feyre Archeron, a human huntress keeping her family from starving after her father lost the family's fortune, kills a wolf in the woods to survive a brutal winter — not realizing it's a faerie in disguise. An old treaty between humans and faeries demands payment for a faerie's death, and Feyre is taken from the human lands into Prythian. She's grown up on stories of faeries as monsters, and has no reason yet to expect anything else.",
+        events: [
+          "Feyre is taken to the Spring Court under an old treaty — the rule the whole series runs on: faerie bargains are absolute, and breaking them has real consequences.",
+          "The masks and the drained color in the land are the first sign this isn't a romance without stakes — Prythian is under a curse that's slowly killing it.",
+          "Rhysand's bargain with Feyre — one week a year, no explanation given — looks like a throwaway threat here. It isn't; it's the seed of the entire next book.",
+          "Feyre choosing to face Amarantha's trials instead of letting Tamlin die is the first time she puts someone else's life above her own survival — the pattern her whole arc is built on.",
+          "Her death and resurrection by all seven High Lords is why she carries power from every court, not just Spring — a detail that matters constantly from here on.",
+          "As trust grows between them, Feyre and Tamlin's relationship deepens physically — a shift that marks how far her guard has come down, right before everything is upended by the trials."
+        ],
+        relationships: "Feyre and Tamlin fall in love and anchor the book's romance. Rhysand is introduced as unsettling and morally grey, clearly playing a longer game. Lucien, Tamlin's fox-masked emissary, becomes a loyal friend to Feyre.\n\nThe romance here is tender rather than explicit — physical intimacy is present but understated, in keeping with this book's slower-burn tone compared to what follows.",
+        cliffhanger: "Feyre is alive, reborn as High Fae, and engaged to Tamlin — but forever changed by what she survived, and quietly bound by a debt to Rhysand she hasn't paid yet."
+      },
+      listen: [
+        {who:'wren', text:"Okay, book one. A human girl kills a wolf to feed her family, and it turns out that wolf was a faerie. That's the whole inciting incident."},
+        {who:'sol', text:"Which is such a fairy-tale setup — debt paid in a life for a life. Feyre gets dragged off to the Spring Court to live with Tamlin as payment."},
+        {who:'wren', text:"And obviously falls for him, because the land is cursed, everyone's wearing creepy masks, and nobody will tell her why."},
+        {who:'sol', text:"The masks are the tell that something's very wrong. Turns out it all traces back to Amarantha — she's holding every High Lord in Prythian hostage under a mountain."},
+        {who:'wren', text:"This is also where we meet Rhysand for the first time, and he is NOT a good guy in this book. He makes Feyre agree to a bargain — one week a year at his court — and won't say why."},
+        {who:'sol', text:"Remember that. It matters a lot later. Anyway — to save Tamlin, Feyre volunteers for Amarantha's three trials. Riddle, physical trial, the works."},
+        {who:'wren', text:"And she dies. Actually dies completing the last one."},
+        {who:'sol', text:"And then all seven High Lords — including Rhysand — each give up a piece of their power to bring her back. So Feyre ends book one alive, High Fae, and carrying a splinter of magic from every court in Prythian."},
+        {who:'wren', text:"Engaged to Tamlin, changed forever, and still owing Rhysand that bargain. Great start to a series, no notes."}
+      ]
+    },
+    timeline: {
+      read: [
+        { phase: 'Opening', text: "It's the dead of winter, and Feyre — the only one of her family still willing to hunt — kills a wolf in the woods to keep them fed." },
+        { text: "The wolf, it turns out, was a faerie. Under an old treaty between humans and faeries, a life must be answered with a life, or its equivalent." },
+        { text: "A beast-like creature arrives at the family's door and takes Feyre across the wall into Prythian as payment — she has no say in it." },
+        { phase: 'Rising', text: "She's brought to a grand, permanently blooming manor at the Spring Court, home of its High Lord, Tamlin, and his emissary, Lucien." },
+        { text: "Life there is stranger than captivity should be — the faeries around her wear masks, and the land itself looks and feels drained, though no one will explain why." },
+        { text: "Despite herself, Feyre grows close to Tamlin, and the wary hostility between them softens into something else." },
+        { text: "A visiting Night Court emissary, Rhysand, notices her — and before leaving, strikes a private bargain: one week a year at his court, in exchange for a debt he won't name yet." },
+        { text: "Piece by piece, Feyre learns the truth behind the masks and the dying land: a faerie queen named Amarantha has cursed all of Prythian and is holding every High Lord captive beneath a mountain." },
+        { phase: 'Turning Point', text: "When Tamlin is called back to face Amarantha, Feyre follows — and offers herself in his place for whatever trial the queen demands." },
+        { text: "Amarantha sets three trials meant to kill her. Feyre survives the first two through grit and a puzzle solved as much by instinct as by strength — and the third forces her to kill three fae with an ash dagger. The third victim is revealed to be Tamlin himself, heart turned to stone by the curse; recognizing him in time is what saves him." },
+        { phase: 'Resolution', text: "Enraged, Amarantha beats Feyre and poses one final riddle before finishing her off. Feyre works out the answer — love — and speaks it aloud just as she dies." },
+        { text: "In response, all seven High Lords — enemies as much as allies — each give up a piece of their own power to bring her back to life as one of them: High Fae." },
+        { text: "She wakes changed, engaged to Tamlin, and carrying magic from every court in Prythian — with a bargain to Rhysand still sitting, unpaid, in the background." }
+      ],
+      listen: [
+        {who:'wren', text:"Timeline version, straight through: Feyre kills a wolf, gets taken as payment, ends up at Spring Court with Tamlin."},
+        {who:'sol', text:"She falls for him while the court's curse — courtesy of Amarantha — slowly comes into focus, and Rhysand shows up to strike that mysterious bargain."},
+        {who:'wren', text:"Then it's the three trials to save Tamlin — grit, a puzzle, and finally being forced to kill three fae, the third turning out to be Tamlin himself."},
+        {who:'sol', text:"Amarantha throws one last riddle at her as a final cruelty. Feyre answers it — love — right as she dies. All seven High Lords bring her back as High Fae."}
+      ]
+    },
+    character: {
+      read: "This book is really Feyre's transformation from a starving, closed-off survivor into someone capable of self-sacrifice. She starts the book defined by fear and duty to her family; by the end, she's willing to die for people she chose, not just people she's obligated to.\n\nTamlin is defined here by warmth and protectiveness — traits that read as romantic in this book, though they set up his arc as a controlling figure in book two.\n\nRhysand is deliberately unreadable in this book: cruel-seeming, transactional, clearly hiding motives Feyre (and the reader) can't see yet.",
+      listen: [
+        {who:'wren', text:"If you only care about character arcs: Feyre goes from 'I do what I must to survive' to 'I'll die for people I chose.' That's the whole book one arc."},
+        {who:'sol', text:"Tamlin's arc here is just... warmth and protection. Reads as romantic in this book specifically. Keep an eye on that, because it flips."},
+        {who:'wren', text:"And Rhysand is written to be unreadable on purpose. Cruel, transactional, clearly hiding something. You're not supposed to trust him yet."},
+        {who:'sol', text:"That's deliberate — his real arc doesn't start until book two."}
+      ]
+    },
+    situation: {
+      read: "The pivotal situation of this book is Under the Mountain — the extended sequence where Amarantha forces Feyre through three trials to prove her worth before Tamlin's court. It's the section that defines the emotional stakes of the whole series: the third trial forces her to kill three fae with an ash dagger, and the third turns out to be Tamlin himself, his heart turned to stone by the curse — recognizing him in time is what saves him. Immediately after, Amarantha poses one final riddle as a last cruelty, and Feyre answers it — love — just as she dies from her wounds.\n\nHer death and resurrection at the end of this sequence is the hinge the entire series turns on — it's the reason she becomes High Fae, the reason all seven High Lords are now connected to her, and the reason Rhysand's hidden bargain suddenly matters.",
+      listen: [
+        {who:'wren', text:"The one moment to really remember from book one is Under the Mountain — Amarantha's three trials."},
+        {who:'sol', text:"Feyre survives the first two through grit and instinct, then the third forces her to kill three fae with an ash dagger — the third turns out to be Tamlin himself."},
+        {who:'wren', text:"She recognizes him in time to save him. Then Amarantha throws one last riddle at her as a final cruelty, and Feyre answers it — love — right as she dies."},
+        {who:'sol', text:"That's when all seven High Lords step in to bring her back. Which is also why she comes out of it with power from every court, not just Spring. That one sequence sets up basically everything."}
+      ]
+    }
+  }
+},
+{
+  numeral: 'II', label: 'Mist & Fury', title: 'A Court of Mist and Fury',
+  depths: {
+    high: {
+      read: "Feyre returns from book one changed, but everyone around her — especially Tamlin — ignores that. When Rhysand collects on their bargain, she starts spending time at the Night Court, where she meets his inner circle, begins training her multi-court powers, and discovers she and Rhys are secretly mates. She leaves Tamlin for the Night Court. Meanwhile, the King of Hybern is hunting an artifact called the Book of Breathings, which can shatter the wall between human and faerie lands — and when Tamlin, desperate to win her back, allies with Hybern, the chaos that follows gets Feyre's sisters forcibly turned into High Fae. To protect her new family, Feyre stages a devastating ruse: she secretly marries Rhys and becomes High Lady of the Night Court, then lets Tamlin believe he's won her back, returning to the Spring Court as a hidden spy.",
+      listen: [
+        {who:'wren', text:"Book two, fast: Feyre's back from book one and clearly not okay, but Tamlin just locks her in the house instead of dealing with it."},
+        {who:'sol', text:"Rhys collects his bargain, she starts spending time at Night Court, meets the inner circle, and — big reveal — they're mates."},
+        {who:'wren', text:"She leaves Tamlin for the Night Court. Meanwhile the King of Hybern's hunting the Book of Breathings — an artifact that can break the wall between human and faerie lands."},
+        {who:'sol', text:"Then it gets dark fast: Tamlin allies with Hybern to get her back, her sisters get forced into the Cauldron, and Feyre secretly marries Rhys and becomes High Lady — then fakes reconciling with Tamlin to spy on him from inside Spring Court."}
+      ]
+    },
+    detailed: {
+      read: {
+        situation: "Feyre is technically safe — home, engaged to Tamlin, no longer in danger. But she's hollowed out by what she survived Under the Mountain, unable to sleep, eat, or feel like herself, and no one around her seems to know how to help, least of all Tamlin. What should feel like a happy ending doesn't.",
+        events: [
+          "Tamlin's protectiveness curdling into control matters because it's the book's real argument: that protection without trust is just a cage, whoever's offering it.",
+          "The mating bond reveal recontextualizes everything Rhysand did in book one — it wasn't cruelty, it was concealment to keep Amarantha from using her against him.",
+          "Feyre discovering she can draw on abilities from all seven courts, not just Spring, is what makes her useful — and later dangerous — in ways no other character is.",
+          "Her choosing the Night Court over Tamlin is the first major decision in the series she makes entirely for herself, not out of duty or survival.",
+          "The King of Hybern hunting the Book of Breathings — an artifact that can shatter the wall between human and faerie lands — is what turns this from a personal story into the war the rest of the series is built around.",
+          "Nesta and Elain being forced into the Cauldron is the event book five is built entirely around, even though it barely gets space here.",
+          "Once Feyre chooses Rhys, their relationship includes several extended intimate scenes — widely considered by readers the point where the series' romantic content becomes significantly more central, mirroring how unguarded both characters finally are with each other.",
+          "Feyre secretly marrying Rhys and becoming High Lady — then faking a reconciliation with Tamlin to spy on him from inside his own court — is the series' clearest example of her using deception as a weapon rather than a survival tactic. It's the entire setup for book three."
+        ],
+        relationships: "Feyre and Rhysand's relationship becomes the series' central romance, revealed as a true mating bond — and by the book's end, a secret marriage. Tamlin curdles from love interest into someone Feyre has to actively deceive. Feyre bonds deeply with Rhys's inner circle, who become her found family.\n\nThis is generally regarded as one of the more intimate books in the series — not incidental, but part of how it signals that this relationship, unlike the last one, is built on equality rather than protection-as-control.",
+        cliffhanger: "War with Hybern is now inevitable, Feyre's sisters are faerie against their will, and Feyre has just pulled off the biggest gamble of her life — secretly Rhys's wife and Prythian's newest High Lady, about to walk back into Tamlin's court pretending to be exactly what he wants her to be."
+      },
+      listen: [
+        {who:'wren', text:"This is the one everyone says is the real start of the series. Feyre's back from book one, engaged to Tamlin, and she is not okay."},
+        {who:'sol', text:"And Tamlin's response to 'my fiancée survived something traumatic' is to lock her in the house. Which, no."},
+        {who:'wren', text:"Cue Rhysand showing up to collect that bargain — one week a month at the Night Court. And that's where the book actually opens up."},
+        {who:'sol', text:"We meet the whole inner circle here — Cassian, Azriel, Mor, Amren — and Feyre finally starts training the powers she got from all seven High Lords in book one."},
+        {who:'wren', text:"Also: massive reveal. Feyre and Rhys are mates. Have been since Under the Mountain. He just hid it from her to protect her from Amarantha."},
+        {who:'sol', text:"So she leaves Tamlin, chooses Rhys and the Night Court, and meanwhile the actual plot kicks in — the King of Hybern is hunting an artifact called the Book of Breathings that can break the wall between human and faerie lands."},
+        {who:'wren', text:"And it goes badly fast. Tamlin, desperate to get her back, allies with Hybern — and in the chaos, Feyre's sisters Nesta and Elain get shoved into the Cauldron and turned Fae against their will."},
+        {who:'sol', text:"Then Feyre pulls the wildest move in the book: she secretly marries Rhys and becomes High Lady — then fakes going back to Tamlin, pretending it was all a nightmare, so she can spy on him from the inside."},
+        {who:'wren', text:"So going into book three: full-blown war is coming, two new reluctant Fae sisters, and Feyre's playing the most dangerous role of her life — secretly the enemy's wife, hiding in plain sight."}
+      ]
+    },
+    timeline: {
+      read: [
+        { phase: 'Opening', text: "Feyre is home, physically safe, and engaged to Tamlin — but hollowed out by what she survived Under the Mountain, unable to sleep or eat like herself again." },
+        { text: "No one around her seems to notice how much she's changed, least of all Tamlin, who reads her withdrawal as something to be managed rather than understood." },
+        { text: "His protectiveness curdles into control — he starts keeping her confined to the manor \"for her own safety,\" which only isolates her further." },
+        { phase: 'Rising', text: "Rhysand arrives to collect on the bargain struck back in book one: one week a month, Feyre must live at the Night Court." },
+        { text: "There, for the first time since Under the Mountain, she meets people who don't flinch from what happened to her — Cassian, Azriel, Mor, and Amren, Rhys's inner circle." },
+        { text: "She begins training the powers she was given by all seven High Lords, discovering she can shapeshift and draw on abilities well beyond anything Spring Court magic could teach her." },
+        { text: "As she spends more time at the Night Court, it's revealed that she and Rhys are mates — bonded since Under the Mountain, a truth he hid specifically to keep Amarantha from using it as a weapon against them both." },
+        { phase: 'Turning Point', text: "Torn between two worlds, Feyre ultimately breaks her engagement to Tamlin and chooses to stay with Rhys and the Night Court." },
+        { text: "Almost immediately, the real threat of the book surfaces: the King of Hybern is hunting an ancient artifact, the Book of Breathings, which can shatter the wall separating the human and faerie lands." },
+        { text: "Desperate to win Feyre back, Tamlin makes a fatal miscalculation: he allies with Hybern, opening his court's lands to the king's forces." },
+        { phase: 'Resolution', text: "In the chaos that follows, Feyre's human sisters, Nesta and Elain, are seized and forced into the Cauldron — transformed into High Fae against their will." },
+        { text: "To protect her new family and the Night Court, Feyre makes her most dangerous move yet: she secretly marries Rhysand and is named High Lady — then lets Tamlin believe he's won her back." },
+        { text: "The book ends with Feyre returning to the Spring Court, pretending to be broken and reclaimed, while secretly working as a spy for the Night Court she now co-rules." }
+      ],
+      listen: [
+        {who:'wren', text:"Straight through: Feyre's home, engaged, and clearly not okay — Tamlin just locks her in the house instead of helping."},
+        {who:'sol', text:"Rhys collects his bargain, she meets the inner circle at Night Court, and it comes out that they're mates."},
+        {who:'wren', text:"She leaves Tamlin. Then the real plot kicks in — King of Hybern is hunting the Book of Breathings, an artifact that can break the wall."},
+        {who:'sol', text:"Tamlin allies with Hybern to get her back, her sisters get forced into the Cauldron, and Feyre secretly marries Rhys and becomes High Lady — then fakes going back to Tamlin as a spy."}
+      ]
+    },
+    character: {
+      read: "This is Tamlin's fall and Rhysand's redemption, structurally. Tamlin's protectiveness from book one, read here as trauma-driven control, turns him into someone Feyre has to escape rather than lean on — the book uses this to show that love without trust becomes a cage.\n\nRhysand, by contrast, is revealed to have been protecting Feyre the entire time, at cost to himself; his arc is about a genuinely soft, loyal person who's built an intimidating persona because his position demands it.\n\nFeyre's arc is reclaiming agency — literally choosing where she lives and who she loves, after a book where she had almost no choices.",
+      listen: [
+        {who:'wren', text:"Character-wise, this book flips Tamlin and Rhys. Tamlin's protectiveness turns into control — trauma response, but it still traps Feyre."},
+        {who:'sol', text:"And Rhys turns out to have been protecting her the whole time, at real cost to himself. He just plays the villain well because his position needs him to."},
+        {who:'wren', text:"Feyre's whole arc here is choosing things for herself for once. Where she lives, who she's with — book one, she barely had a choice in anything."}
+      ]
+    },
+    situation: {
+      read: "The situation to hold onto is the mating bond reveal and everything that follows it. Once Feyre learns she and Rhys have been mates since Under the Mountain — and that he hid it specifically to protect her from Amarantha using it as leverage — the whole emotional architecture of the series shifts.\n\nIt reframes Rhys's behavior in book one entirely, and it's the reason the found-family dynamic with his inner circle (Cassian, Azriel, Mor, Amren) becomes central going forward, not a side detail.",
+      listen: [
+        {who:'wren', text:"One moment to hold onto: the mating bond reveal. Feyre finds out she and Rhys have been mates since book one."},
+        {who:'sol', text:"And that he hid it on purpose — specifically so Amarantha couldn't use it against them. That recontextualizes his whole book one behavior."},
+        {who:'wren', text:"It's also why the inner circle stops being background characters and becomes core to the story from here on."}
+      ]
+    }
+  }
+},
+{
+  numeral: 'III', label: 'Wings & Ruin', title: 'A Court of Wings and Ruin',
+  depths: {
+    high: {
+      read: "Feyre, already secretly married to Rhys and High Lady in all but public knowledge, spends the book undermining Tamlin's alliance with Hybern from inside the Spring Court as a spy. The seven High Lords eventually form a fragile coalition against Hybern, though it nearly collapses when Feyre's secret — that she carries power from every court — comes out. War breaks out, and in the climactic battle, Rhysand sacrifices himself reforging the shattered Cauldron and dies; the other High Lords bring him back, mirroring Feyre's own resurrection in book one. The King of Hybern is killed by Elain and Nesta together — Elain stabs him through the throat, Nesta finishes it. Feyre and Rhys's bond becomes fully public, and she's recognized by all of Prythian as High Lady. Nesta remains distant and unwell as the book closes.",
+      listen: [
+        {who:'wren', text:"Book three, quick version: Feyre's secretly already married to Rhys, and she's spying on Tamlin from inside the Spring Court, undermining his alliance with Hybern."},
+        {who:'sol', text:"The seven High Lords form a coalition, though it almost falls apart when everyone learns Feyre secretly carries power from every court."},
+        {who:'wren', text:"War breaks out, and Rhysand actually dies reforging the Cauldron in the final battle — the High Lords bring him back the same way they brought Feyre back in book one."},
+        {who:'sol', text:"The King of Hybern dies at Elain and Nesta's hands together — Elain stabs him, Nesta finishes it — and Feyre's finally recognized publicly as High Lady. Nesta's still a mess in the background, which book four and five are about to deal with."}
+      ]
+    },
+    detailed: {
+      read: {
+        situation: "The spy plan is already in motion. Feyre has spent weeks back at the Spring Court playing a role — the broken, reclaimed fiancée — while secretly married to Rhys, secretly High Lady, and secretly feeding intelligence to the Night Court. Trust is currency now, and she's spending all of hers on a lie only she and Rhys fully understand the shape of.",
+        events: [
+          "Spying from inside Tamlin's court matters less as an action and more as proof of what Feyre's become — the person running the operation, not the one needing rescuing.",
+          "The seven High Lords setting aside old rivalries to form a coalition is a genuine structural shift in how Prythian is governed — it doesn't just win the war, it changes the politics for good.",
+          "The coalition nearly breaks apart when it comes out that Feyre unknowingly carries a piece of power from every High Lord, including ones who never agreed to that — a consequence of her book-one resurrection nobody had fully reckoned with.",
+          "Cassian and Nesta's antagonism getting properly established here is easy to skim past, but it's the direct setup for all of book five.",
+          "Rhysand dying to reforge the shattered Cauldron, then being revived by the other High Lords, mirrors Feyre's own resurrection in book one almost exactly — and it's the moment that finally makes their bond public and undeniable to everyone in Prythian.",
+          "The King of Hybern's death — Elain stabs him, Nesta delivers the final blow — closes the war arc that's driven the last two books — everything after this is rebuilding, not fighting."
+        ],
+        relationships: "Feyre & Rhysand's bond — already real since book two — becomes fully public here, no longer something either of them has to hide or lie about. Elain and Lucien's mate bond is confirmed but left unexplored. Nesta remains distant and hostile toward the Night Court, setting up her own arc.\n\nThe intimacy in this book is tied less to a single ceremony and more to the relationship finally existing out in the open — nothing left to conceal.",
+        cliffhanger: "The war is won, and Rhys and Feyre no longer have to hide what they are to each other — but Nesta is spiraling, and the true cost of the fighting is still being counted."
+      },
+      listen: [
+        {who:'wren', text:"Book three opens with Feyre playing double agent — secretly already Rhys's wife and High Lady, pretending to Tamlin that she's been broken and reclaimed."},
+        {who:'sol', text:"She spends the book undermining his alliance with Hybern from the inside, while the seven High Lords slowly get pushed toward an actual coalition."},
+        {who:'wren', text:"It almost falls apart when everyone learns Feyre secretly carries power from every court — including High Lords who never agreed to give her any."},
+        {who:'sol', text:"Meanwhile Nesta and Elain are dealing with being forced into Fae bodies they never asked for. Nesta's furious and pushing everyone away, Elain's just... shattered."},
+        {who:'wren', text:"And there's a quiet reveal that Lucien and Elain are mates, though nobody's really equipped to deal with that yet, least of all Elain."},
+        {who:'sol', text:"Then the war actually happens. Big battle, the Cauldron itself is basically the weapon everyone's fighting over."},
+        {who:'wren', text:"Here's the gut-punch: Rhysand dies reforging the Cauldron to save everyone. The other High Lords bring him back — same thing they did for Feyre in book one."},
+        {who:'sol', text:"It's Elain and Nesta who end the King together — Elain stabs him through the throat, Nesta finishes it. The coalition wins, but it's not clean — there's real loss in this book."},
+        {who:'wren', text:"Tamlin ends the book with basically nothing. Lost his standing, lost the girl, alone at Spring Court. And Feyre and Rhys's bond is finally, fully public — no more hiding, no more spying."},
+        {who:'sol', text:"So the big war plot wraps here. What doesn't wrap is Nesta — and that's exactly what the next two books pick up."}
+      ]
+    },
+    timeline: {
+      read: [
+        { phase: 'Opening', text: "Feyre goes back to the Spring Court undercover, playing the broken, reclaimed fiancée — while secretly already married to Rhys and, in private, High Lady of the Night Court." },
+        { text: "It's a dangerous, exhausting act — every day spent smiling at people she's actively deceiving, feeding intelligence back to the Night Court to undermine Tamlin's alliance with Hybern from the inside." },
+        { phase: 'Rising', text: "Word slowly builds toward a coalition: the seven High Lords, historic rivals, are pushed to set aside centuries of distrust and stand together against Hybern, joined by human forces." },
+        { text: "The coalition nearly collapses when it comes out that Feyre unknowingly carries a splinter of power from every High Lord — a side effect of her book-one resurrection nobody had fully reckoned with." },
+        { text: "Meanwhile, Nesta and Elain are still struggling to adjust to a transformation neither of them chose — Nesta furious and closed off, Elain gentle but shattered." },
+        { text: "A quiet current runs underneath the war planning: Lucien's mating bond to Elain starts to surface, though she isn't remotely ready to face it." },
+        { phase: 'Turning Point', text: "The coalition holds, and a large-scale war finally breaks out against Hybern's forces, with the Cauldron itself at the center of the final battle." },
+        { text: "In the climax, reforging the shattered Cauldron takes more power than one person can survive — Rhysand dies completing it." },
+        { phase: 'Resolution', text: "Feyre begs the other High Lords to do for Rhys what they once did for her: each gives a piece of their power to bring him back to life." },
+        { text: "It's Elain and Nesta, together, who end the King of Hybern — Elain stabs him through the throat, Nesta finishes it, ending the war." },
+        { text: "In the aftermath, Feyre and Rhysand's bond is no longer a secret from anyone — she's publicly recognized as High Lady of the Night Court, ruling as his full equal." },
+        { text: "The book closes on peace, technically won — but Nesta is spiraling in the background, a thread the story deliberately leaves hanging." }
+      ],
+      listen: [
+        {who:'wren', text:"In order: Feyre spies from inside Spring Court while secretly already married to Rhys, and the High Lords slowly form a coalition."},
+        {who:'sol', text:"It nearly falls apart over her secret power, Elain and Lucien's bond starts surfacing, then the actual war happens — Cauldron at the center of it."},
+        {who:'wren', text:"Rhysand dies reforging the Cauldron, the High Lords bring him back like they did for Feyre in book one, and Elain and Nesta together end the King of Hybern."},
+        {who:'sol', text:"Feyre and Rhys's bond is finally public. That's the whole arc, start to finish."}
+      ]
+    },
+    character: {
+      read: "Feyre completes her arc here from someone who survives events to someone who shapes them — she's not just a piece in the war, she's one of its architects, ending the book as a ruler in her own right rather than someone's fiancée.\n\nTamlin's arc closes on isolation: everything his book one protectiveness was meant to prevent — losing everything — happens anyway, because control was never actually protection.\n\nNesta's arc is only beginning here: her fury and refusal to be grateful for a transformation she never wanted becomes the emotional seed for book five.",
+      listen: [
+        {who:'wren', text:"Feyre's arc finishes here — she goes from surviving events to actually shaping them. She ends the book as a ruler, not somebody's fiancée."},
+        {who:'sol', text:"Tamlin's arc closes on isolation. Everything his overprotectiveness in book one was supposedly trying to prevent — happens anyway."},
+        {who:'wren', text:"And Nesta's arc is just getting started. Her anger about never consenting to any of this is the seed for her whole book five."}
+      ]
+    },
+    situation: {
+      read: "The pivotal situation is the war itself and the political maneuvering required to make it happen — specifically the moment the High Lords, who've spent centuries as rivals, agree to fight as a coalition. It matters because it's not a given; the book spends real time on the diplomacy and trust-building required, and it sets the tone for how Prythian is governed differently afterward.\n\nFeyre's public recognition as High Lady in the aftermath is the direct payoff of that shift toward shared, rather than singular, power — even though the bond and title were already true in secret since book two.",
+      listen: [
+        {who:'wren', text:"Key situation in book three: getting the seven High Lords to actually form a coalition. That's not a given — they've been rivals for centuries."},
+        {who:'sol', text:"The book spends real time on that diplomacy, and it's why the ending — Feyre's bond and title finally becoming public knowledge instead of a secret — actually lands."},
+        {who:'wren', text:"It's a structural shift in how Prythian works, not just a romantic gesture."}
+      ]
+    }
+  }
+},
+{
+  numeral: 'IV', label: 'Frost & Starlight', title: 'A Court of Frost and Starlight',
+  depths: {
+    high: {
+      read: "A quiet Winter Solstice interlude after the war. Not much plot moves forward except Nesta's decline becoming impossible to ignore, and Elain's slow healing.",
+      listen: [
+        {who:'wren', text:"Book four's short — it's a Winter Solstice novella, not a plot book."},
+        {who:'sol', text:"The one real thing that happens: Nesta's clearly not okay, and the family finally can't ignore it anymore."}
+      ]
+    },
+    detailed: {
+      read: {
+        situation: "The war has been over for months. This is the first Winter Solstice the Night Court has celebrated since the fighting ended, and everyone is trying, with varying success, to remember how to just live again.",
+        events: [
+          "This book matters less for what happens and more for what it makes impossible to ignore any longer: Nesta's decline, brought fully into the open after two books of hints.",
+          "Elain's quiet, unhurried healing here sets the tone for how her arc is handled going forward — nothing rushed, including her bond to Lucien.",
+          "The Solstice traditions and family dynamic established here are the baseline book five pushes against.",
+          "As a quieter, holiday-set book, intimacy here is present but low-key — more domestic closeness than any major new physical beat."
+        ],
+        relationships: "Mostly maintains existing relationships rather than advancing them — except for deepening the sense that Nesta is in real crisis.\n\nNothing structurally significant changes on the intimacy front here — it's a resting point for the established couples, not a turning one.",
+        cliffhanger: "Nesta's spiral has reached a point where the family finally agrees something has to be done about her."
+      },
+      listen: [
+        {who:'wren', text:"Quick one — book four is a novella, not a full plot book. It's the Winter Solstice, right after the war."},
+        {who:'sol', text:"So don't expect a big new conflict here. It's more like... an epilogue that's also a setup. Everyone's trying to be normal again and mostly failing."},
+        {who:'wren', text:"The one thing that actually matters going forward: Nesta. Her drinking, her isolating herself, all of it gets impossible to ignore in this book."},
+        {who:'sol', text:"And Elain's quietly healing in her own way — gardening, mostly — while her bond to Lucien just sits there, unresolved."},
+        {who:'wren', text:"So really, the whole point of book four is: the war's over, and now here's the next problem — Nesta — and it's about to get its own full book."}
+      ]
+    },
+    timeline: {
+      read: [
+        { phase: 'Opening', text: "The war has been over for months, and the Night Court prepares to celebrate its first Winter Solstice since the fighting ended." },
+        { phase: 'Rising', text: "The Inner Circle tries, with mixed success, to return to something like normal life — gift-shopping, decorating, pretending the last few years didn't happen." },
+        { text: "Underneath the festivities, Nesta's decline becomes impossible to ignore — she's drinking heavily, living apart from the family, and pushing away anyone who tries to reach her." },
+        { text: "Elain, by contrast, is slowly adjusting to Fae life at her own pace, finding a quiet form of healing in tending a garden — no pressure toward Lucien, no pressure toward anything." },
+        { phase: 'Resolution', text: "By the time the Solstice gathering wraps, the family can't keep looking away — they agree, together, that something has to be done about Nesta." }
+      ],
+      listen: [
+        {who:'wren', text:"Short one: it's the first Solstice after the war, everyone's trying to feel normal again."},
+        {who:'sol', text:"The one real throughline is Nesta — her drinking and isolating gets impossible to ignore by the end."}
+      ]
+    },
+    character: {
+      read: "This entire book exists to develop Nesta's crisis in the open rather than off-page, and to show Elain quietly finding her own pace of healing (through gardening) without being rushed into anything, including her bond with Lucien.",
+      listen: [
+        {who:'wren', text:"Character-wise, this book is really just showing Nesta's decline up close instead of hinting at it."},
+        {who:'sol', text:"And Elain healing at her own pace — no rush toward Lucien, no rush toward anything. Which matters, because book five and beyond respect that pacing."}
+      ]
+    },
+    situation: {
+      read: "There isn't a major plot \"situation\" here — the closest thing is the Solstice gathering itself, used as a lens to check in on where everyone stands after the war, most notably making clear that Nesta's isolation has become the family's next problem to solve.",
+      listen: [
+        {who:'wren', text:"Honestly there's no big situation to flag here beyond the Solstice gathering itself."},
+        {who:'sol', text:"It's really just a checkpoint — here's where everyone landed after the war, and here's the flashing warning light on Nesta."}
+      ]
+    }
+  }
+},
+{
+  numeral: 'V', label: 'Silver Flames', title: 'A Court of Silver Flames',
+  depths: {
+    high: {
+      read: "Nesta, still spiraling months after being forced into the Cauldron, is sent to train under Cassian at Rhys's insistence and put to work in the House of Wind's library. She slowly finds purpose there — training with Cassian, and bonding with two new friends, Gwyn and Emerie, the three of them reviving an old warrior tradition, the Valkyries. The book's threat is Briallyn, a human queen twisted by the Cauldron into a vengeful crone, allied with an ancient death-lord named Koschei in a hunt for three powerful relics called the Dread Trove. Nesta destroys Briallyn in the climax — but right after, Feyre's premature, dangerous labor nearly kills her, Rhys, and their newborn son, and it's Nesta, using the Trove and her stolen Cauldron power, who saves them, giving most of that power back in the process. Koschei himself is never dealt with — a clear thread left for what comes next.",
+      listen: [
+        {who:'wren', text:"Book five, fast: Nesta's still spiraling, so Rhys has her sent to train with Cassian and work in the House of Wind's library."},
+        {who:'sol', text:"She befriends two women there, Gwyn and Emerie, and the three of them start training together — reviving an old tradition called the Valkyries."},
+        {who:'wren', text:"The threat is Briallyn, a human queen twisted into a crone by the Cauldron, hunting three relics called the Dread Trove with an ancient death-lord named Koschei."},
+        {who:'sol', text:"Nesta destroys Briallyn, but then Feyre's dangerous labor threatens to kill her, Rhys, and the baby — Nesta saves them using the Trove and most of her own stolen power. Koschei's still out there, though — that's the real setup for book six."}
+      ]
+    },
+    detailed: {
+      read: {
+        situation: "Months have passed since the war, and while everyone else seems to be finding their footing, Nesta hasn't. She's living apart from her sisters, drinking most nights, and pushing away anyone who tries to get close — until Rhys, out of patience, gives her an ultimatum: move to the House of Wind, train with Cassian, and work in its library, or be exiled to the human lands.",
+        events: [
+          "Rhys forcing Nesta into structure at the House of Wind matters because it's the first time anyone stops accommodating her spiral and actually intervenes.",
+          "Her friendship with Gwyn and Emerie — and the Valkyrie training they build together — gives Nesta something none of the last four books did: a version of purpose that isn't tied to Feyre, the war, or being someone's problem to solve.",
+          "Briallyn — a human queen the Cauldron transformed into a crone rather than the beauty she wanted — is this book's actual antagonist, not a vague coalition of queens. Her alliance with the death-lord Koschei, and their hunt for the Dread Trove, is the book's active plot.",
+          "Nesta's unique connection to the Cauldron turns out to be the reason she alone can find and eventually wield the Trove — the single most important unresolved detail for understanding whatever comes next.",
+          "Feyre's dangerous, premature labor — and Nesta using the Trove to save her, Rhys, and the baby, at the cost of most of her own power — is the book's real climax, arguably more than Briallyn's defeat.",
+          "Nesta and Cassian's enemies-to-mates dynamic includes the most extensive intimate content in the series so far, which fans widely consider a defining feature of this book — tied directly to their shift from antagonism to trust."
+        ],
+        relationships: "Nesta & Cassian become the series' second confirmed mated couple, acknowledging their bond after Cassian nearly dies protecting her. Nesta begins to reconcile with Feyre and rebuild trust with her found family — culminating in being embraced as family after saving Feyre's life.\n\nThis is generally considered the most explicit book in the series by the fandom; the intimacy is closely tied to Nesta's arc specifically — physical trust becomes a stand-in for the emotional trust she's relearning how to give.",
+        cliffhanger: "Briallyn is destroyed and Feyre's family is saved, but Koschei — the death-lord actually behind the book's deeper threat — is never dealt with. This is genuinely the point where your firsthand knowledge goes dark: book five is written to leave Koschei's threat open, which is exactly what books VI and VII exist to answer, and reportedly is where the Crescent City and Throne of Glass connections start to matter more directly."
+      },
+      listen: [
+        {who:'wren', text:"Book five is a full pivot — it's Nesta's book, not Feyre's. And Nesta is not in a good place."},
+        {who:'sol', text:"She's drinking, isolating, basically refusing to deal with what happened to her. So Rhys — tough-love style — gives her an ultimatum: move to the House of Wind, train with Cassian, work in the library, or get exiled."},
+        {who:'wren', text:"There she meets Gwyn and Emerie, and the three of them start training together — they end up reviving an old warrior tradition called the Valkyries."},
+        {who:'sol', text:"Meanwhile the actual threat of the book is Briallyn — a human queen the Cauldron turned into a crone instead of the young beauty she wanted. She's allied with an ancient death-lord, Koschei, hunting three relics called the Dread Trove."},
+        {who:'wren', text:"Cassian and Nesta's training turns into a romance, enemies-to-mates, very much the point of this book."},
+        {who:'sol', text:"It comes out that Nesta has a unique, unsettling connection to the Cauldron — nobody else has that, not even Feyre."},
+        {who:'wren', text:"In the climax, Briallyn mind-controls Cassian and orders him to kill Nesta — he stabs himself instead to break free, and Nesta destroys Briallyn in a rage."},
+        {who:'sol', text:"Then the real gut-punch: Feyre goes into dangerous premature labor, and she, Rhys, and the baby are all dying. Nesta uses the Trove and gives back most of her own stolen power to save them."},
+        {who:'wren', text:"Nesta and Cassian's bond is confirmed, she's finally embraced as family — but Koschei, the actual death-lord pulling strings, is never dealt with. That's the real setup for book six."}
+      ]
+    },
+    timeline: {
+      read: [
+        { phase: 'Opening', text: "Months after the war, Nesta is still spiraling — drinking most nights, isolating from her sisters, refusing to process what happened to her." },
+        { text: "Rhys, finally out of patience, gives her an ultimatum: move to the House of Wind, train with Cassian, and work in its library — or be exiled to the human lands." },
+        { phase: 'Rising', text: "She's effectively assigned to train under Cassian, whether she wants to or not — structure imposed on someone who's spent months refusing any." },
+        { text: "In the library, she meets Gwyn, a priestess recovering from a traumatic attack, and Emerie, an Illyrian shopkeeper facing her own camp's misogyny. The three become friends and start training together, eventually reviving an old warrior tradition — the Valkyries." },
+        { text: "As she trains, it comes out that Nesta has a unique, unsettling connection to the Cauldron itself — something no one else, not even Feyre, seems to share." },
+        { text: "Outside her personal arc, the real threat surfaces: Briallyn, a human queen the Cauldron transformed into a crone, has allied with an ancient death-lord, Koschei, to hunt three relics called the Dread Trove." },
+        { phase: 'Turning Point', text: "The antagonism between Nesta and Cassian shifts into something else entirely as they train and fight side by side." },
+        { text: "Briallyn kidnaps and mind-controls Cassian, ordering him to kill Nesta — he stabs himself instead to break free of her control." },
+        { phase: 'Resolution', text: "Enraged, Nesta unleashes her Cauldron-given power and destroys Briallyn." },
+        { text: "But the crisis isn't over: Feyre goes into dangerous premature labor, and she, Rhys, and the baby are all close to death." },
+        { text: "Using the Dread Trove and giving back most of her own stolen power, Nesta saves all three of them — and is finally, fully embraced as family." },
+        { text: "Nesta and Cassian's mating bond is confirmed. But Koschei, the death-lord actually behind the book's deeper threat, is never dealt with — this is where your firsthand knowledge runs out." }
+      ],
+      listen: [
+        {who:'wren', text:"In order: Nesta's still spiraling, so Rhys gives her an ultimatum — train at the House of Wind or be exiled."},
+        {who:'sol', text:"She befriends Gwyn and Emerie, they train together as the Valkyries, and it turns out she's got a unique bond to the Cauldron."},
+        {who:'wren', text:"Briallyn — allied with the death-lord Koschei — is the active threat. She mind-controls Cassian, he breaks free by stabbing himself, and Nesta destroys her."},
+        {who:'sol', text:"Then Feyre's dangerous labor nearly kills her, Rhys, and the baby — Nesta saves them with the Trove, giving back most of her power. Koschei's still out there, though."}
+      ]
+    },
+    character: {
+      read: "This is fully Nesta's redemption arc — from someone defined entirely by refusal (to heal, to belong, to be grateful) to someone who chooses purpose on her own terms, not because anyone demanded it of her.\n\nCassian's arc runs in parallel: his easy warmth turns out to be covering his own insecurity about his status as a \"lesser\" Illyrian, and Nesta's the first person who doesn't let him hide behind charm.\n\nTheir relationship works because they refuse to let each other perform strength instead of feeling things.",
+      listen: [
+        {who:'wren', text:"This book is Nesta's redemption arc, full stop. She goes from defined-by-refusal to choosing purpose on her own terms."},
+        {who:'sol', text:"Cassian's got his own thing running underneath — his charm is covering real insecurity about his status. Nesta's the first person who calls that out instead of letting him hide behind it."},
+        {who:'wren', text:"That's basically why their relationship works — neither lets the other perform strength instead of actually feeling things."}
+      ]
+    },
+    situation: {
+      read: "The situation most worth remembering is Nesta's unique bond to the Cauldron — established as something no other character has, not even Feyre. Unlike some threads, this one actually pays off within the book itself: it's precisely why she alone can find and wield the Dread Trove, and why she alone can save Feyre, Rhys, and their newborn son when the birth goes dangerously wrong, at the cost of giving most of that power back.\n\nWhat's deliberately left unresolved instead is Koschei — the ancient death-lord behind Briallyn's alliance — who's never actually dealt with. That's the real thread books six and seven are set up to pick up.",
+      listen: [
+        {who:'wren', text:"If you only remember one thing from book five going into book six: Nesta's connection to the Cauldron actually pays off in this book — it's why she alone can save Feyre, Rhys, and the baby at the end."},
+        {who:'sol', text:"What doesn't pay off is Koschei — the death-lord pulling strings behind Briallyn. He's never dealt with."},
+        {who:'wren', text:"That's about as clear a setup for book six as this series gives you."}
+      ]
+    }
+  }
+}
+];
+
+const castMaster = {
+  'Feyre Archeron': { role: 'High Lady of the Night Court (formerly human)', trait: 'Fiercely protective, stubborn, an artist at heart', note: "The series' central POV, transformed across all five books." },
+  'Rhysand': { role: 'High Lord of the Night Court', trait: 'Guarded, strategic, secretly soft for people he loves', note: "Feyre's mate; plays a long game few understand at first." },
+  'Tamlin': { role: 'High Lord of the Spring Court', trait: 'Loving but possessive when afraid', note: "Feyre's first love; becomes an antagonist by book two." },
+  'Lucien': { role: "Tamlin's emissary, fox-masked", trait: 'Loyal, wry, quietly wounded', note: "Elain's mate; caught between courts and loyalties." },
+  'Amarantha': { role: 'Faerie queen holding Prythian hostage', trait: 'Sadistic, controlling', note: 'Defeated at the end of book one; the reason Feyre nearly died.' },
+  'Cassian': { role: 'Illyrian warrior, general of the Night Court armies', trait: 'Loud, warm, deeply loyal', note: "Nesta's mate by book five." },
+  'Azriel': { role: 'Spymaster of the Night Court', trait: 'Quiet, watchful, self-doubting', note: 'Master of shadows and secrets; his own arc is still unresolved.' },
+  'Mor': { role: "Night Court's Inner Circle", trait: 'Magnetic, fiercely loyal, carries old trauma', note: 'Close friend to Rhys and Feyre.' },
+  'Amren': { role: 'Ancient being trapped in a Fae body', trait: 'Blunt, brilliant, dangerous', note: 'Advisor to the Night Court, far older than she looks.' },
+  'Nesta Archeron': { role: "Feyre's eldest sister, forced High Fae", trait: 'Prickly, proud, turned formidable', note: "Central figure of book five; has a rare bond with the Cauldron." },
+  'Elain Archeron': { role: "Feyre's middle sister, forced High Fae", trait: 'Gentle, quietly resilient', note: "Mate-bonded to Lucien; her arc is still unfolding." },
+  'King of Hybern': { role: 'Ruler seeking to break the wall', trait: 'Ruthless, power-hungry', note: 'Hunts the Book of Breathings in book two, then wields the Cauldron itself in book three to try to destroy the wall between human and faerie lands; killed by Elain and Nesta together in book three.' },
+  'Briallyn': { role: 'A human queen twisted by the Cauldron', trait: 'Vengeful, power-hungry, bitter about her transformation', note: "Allied with the ancient death-lord Koschei in a hunt for the Dread Trove; destroyed by Nesta in book five." }
+};
+
+// Per book: who's brand new (full profile) vs who's returning (just what changed)
+const castByBook = [
+  { // Book I
+    fresh: ['Feyre Archeron', 'Tamlin', 'Rhysand', 'Lucien', 'Amarantha'],
+    returning: []
+  },
+  { // Book II
+    fresh: ['Cassian', 'Azriel', 'Mor', 'Amren', 'Nesta Archeron', 'Elain Archeron', 'King of Hybern'],
+    returning: [
+      { name: 'Feyre Archeron', change: "Reeling from Under the Mountain — retreats into herself until Rhys pulls her back out." },
+      { name: 'Tamlin', change: "His protectiveness curdles into control." },
+      { name: 'Rhysand', change: "Revealed to have been protecting Feyre all along; the mating bond comes to light." },
+      { name: 'Lucien', change: "Stays loyal to Tamlin's court, growing visibly uneasy." },
+      { name: 'Amarantha', change: "Defeated at the end of book one — no longer appears." }
+    ]
+  },
+  { // Book III
+    fresh: [],
+    returning: [
+      { name: 'Feyre Archeron', change: "Spies on the Spring Court while secretly already Rhys's wife and High Lady — evolves from participant to strategist." },
+      { name: 'Rhysand', change: "Dies reforging the shattered Cauldron in the final battle, revived by the other High Lords — the same thing that once brought Feyre back." },
+      { name: 'Tamlin', change: "Isolated further as the coalition forms against him." },
+      { name: 'Cassian', change: "Fights in the war; tension with Nesta begins." },
+      { name: 'Azriel', change: "Plays a key role gathering intelligence for the war." },
+      { name: 'Mor', change: "Fights alongside the Night Court in the final battle." },
+      { name: 'Amren', change: "Her true, ancient nature becomes more central to the war effort." },
+      { name: 'Nesta Archeron', change: "Furious and closed-off, resistant to her new life — until the King of Hybern kills her father in front of her during the final battle, and she and Elain together end him for it." },
+      { name: 'Elain Archeron', change: "Still shattered, her bond to Lucien quietly surfacing — and, in the war's climax, she's the one who stabs the King of Hybern through the throat, with Nesta finishing it." },
+      { name: 'Lucien', change: "His mating bond to Elain begins to surface." },
+      { name: 'King of Hybern', change: "Defeated and killed, ending the main war threat." }
+    ]
+  },
+  { // Book IV
+    fresh: [],
+    returning: [
+      { name: 'Nesta Archeron', change: "Decline becomes impossible to ignore — drinking heavily, isolating." },
+      { name: 'Elain Archeron', change: "Begins healing at her own pace, tending a garden." },
+      { name: 'Feyre Archeron', change: "Settling into peacetime, largely a supporting presence in this shorter book." },
+      { name: 'Rhysand', change: "Focused on rebuilding the Night Court's traditions." },
+      { name: 'Cassian', change: "Present but not yet central — his role with Nesta is still ahead." }
+    ]
+  },
+  { // Book V
+    fresh: ['Briallyn'],
+    returning: [
+      { name: 'Nesta Archeron', change: "Central character now — trains with Cassian, befriends Gwyn and Emerie, destroys Briallyn, and saves Feyre's life using the Dread Trove and most of her own Cauldron-given power." },
+      { name: 'Cassian', change: "Becomes Nesta's mate; his insecurity about his Illyrian status surfaces, and he nearly dies breaking Briallyn's mind control rather than harm Nesta." },
+      { name: 'Feyre Archeron', change: "Supporting role, reconciling with Nesta — until a dangerous premature labor puts her, Rhys, and their newborn son at the center of the book's real climax." },
+      { name: 'Elain Archeron', change: "Continues healing quietly in the background." }
+    ]
+  }
+];
+
+// Character drill-down — one thread paragraph per character, per book they appear in.
+// Reuses the same per-book cast structure as castByBook (fresh + returning) as its source of truth.
+const characterThreadByBook = [
+  { // Book I
+    'Feyre Archeron': "Book one is entirely her introduction: a human huntress forced into faerie lands as payment for a death, who ends the book transformed — literally, into High Fae, and emotionally, into someone willing to sacrifice herself for people she's chosen rather than just people she's obligated to protect.",
+    'Tamlin': "Introduced as the High Lord holding Feyre's debt, Tamlin's arc here is pure warmth and protectiveness — the version of him the story wants you to fall for before later books complicate that picture.",
+    'Rhysand': "Deliberately unreadable in his first appearance — cruel-seeming, transactional, striking a bargain with Feyre that means far more than either of them lets on. You're not meant to trust him yet.",
+    'Lucien': "Tamlin's fox-masked emissary becomes one of Feyre's few steady allies at Spring Court, loyal and wry even as the court's secrets close in.",
+    'Amarantha': "The book's antagonist — a faerie queen holding all seven High Lords hostage under a curse, whose three trials nearly kill Feyre before being broken for good."
+  },
+  { // Book II
+    'Cassian': "Introduced as Rhys's general — loud, warm, immediately protective of Feyre in a way that starts building the found-family dynamic around her.",
+    'Azriel': "The Night Court's spymaster, introduced as quiet and watchful — his role here is mostly background, setting up a character whose own story stays unresolved.",
+    'Mor': "Introduced as fiercely loyal to Rhys and quick to welcome Feyre into the inner circle, carrying visible old trauma the book only hints at.",
+    'Amren': "Introduced as blunt, ancient, and far more dangerous than she looks — established early as someone whose true nature matters more than it first appears.",
+    'Nesta Archeron': "Forced into the Cauldron alongside Elain when Tamlin's alliance with Hybern throws the Spring Court into chaos — Nesta enters the book's second half furious and closed off, the start of an arc that runs the rest of the series.",
+    'Elain Archeron': "Also forced into the Cauldron, Elain's introduction as High Fae is defined by shock and gentleness rather than anger — a contrast to Nesta the books lean on repeatedly.",
+    'King of Hybern': "Introduced as the real threat behind the story's escalating war — hunting the Book of Breathings, an artifact that can shatter the wall between human and faerie lands, is what turns this into a war book.",
+    'Feyre Archeron': "Technically safe but hollowed out by what she survived Under the Mountain. This book is her slow reclaiming of agency — leaving Tamlin, choosing the Night Court, discovering she and Rhys are mates — and it ends with her secretly marrying Rhys, becoming High Lady, and faking a reconciliation with Tamlin to spy on him from the inside.",
+    'Tamlin': "His protectiveness curdles into control here — keeping Feyre confined \"for her own safety\" rather than actually helping her heal, which is exactly what pushes her away.",
+    'Rhysand': "Revealed to have been protecting Feyre the entire time, at real cost to himself — the mating bond reveal recontextualizes everything about how he acted in book one.",
+    'Lucien': "Stays loyal to Tamlin's court through this book, growing visibly uneasy as things sour.",
+    'Amarantha': "Defeated at the end of book one — doesn't appear here."
+  },
+  { // Book III
+    'Feyre Archeron': "Goes undercover at the Spring Court, playing the broken, reclaimed fiancée while secretly already Rhys's wife and High Lady, feeding intelligence to the Night Court — evolves here from someone reacting to events into someone actively shaping them.",
+    'Rhysand': "Dies reforging the shattered Cauldron in the final battle to save everyone — the other High Lords bring him back the same way they once brought Feyre back, and his bond with Feyre becomes fully public for the first time.",
+    'Tamlin': "Increasingly isolated as the coalition forms against Hybern's threat — his book one protectiveness curdled into control, and now it's costing him everything.",
+    'Cassian': "Fights through the war; his tension with Nesta — who he barely tolerates at this point — begins here, setting up book five.",
+    'Azriel': "Plays a key intelligence-gathering role as the war effort ramps up.",
+    'Mor': "Fights alongside the Night Court in the final battle.",
+    'Amren': "Her ancient, dangerous nature becomes more central as the stakes of the war rise.",
+    'Nesta Archeron': "Still furious and closed off about her forced transformation, resistant to accepting help from the Night Court even as the war closes in — until the King of Hybern kills her father in front of her, and she and Elain together end him for it.",
+    'Elain Archeron': "Still shattered by her transformation, her mate bond to Lucien quietly surfacing — and, in the war's climax, she's the one who stabs the King of Hybern through the throat, with Nesta delivering the final blow.",
+    'Lucien': "His mating bond to Elain begins to surface, though neither of them is ready to deal with it yet.",
+    'King of Hybern': "Defeated and killed by the book's end, closing out the war that's driven the last two books."
+  },
+  { // Book IV
+    'Nesta Archeron': "Her decline becomes impossible to ignore here — drinking heavily, isolating from the family, living apart from everyone.",
+    'Elain Archeron': "Begins healing at her own pace, tending a garden, with her bond to Lucien still unresolved and unrushed.",
+    'Feyre Archeron': "A quieter presence in this shorter book — mostly settling into peacetime rather than driving new plot.",
+    'Rhysand': "Focused on rebuilding the Night Court's Solstice traditions after the war.",
+    'Cassian': "Present but not yet central — his real arc with Nesta is still ahead."
+  },
+  { // Book V
+    'Briallyn': "A human queen the Cauldron transformed into a crone rather than the beauty she wanted, allied with the death-lord Koschei in a hunt for the Dread Trove — destroyed by Nesta in the book's climax.",
+    'Nesta Archeron': "The book's central figure — sent to train under Cassian, befriends Gwyn and Emerie, moves from pure refusal to genuinely choosing purpose on her own terms, destroys Briallyn, and saves Feyre's life using the Dread Trove and most of her own Cauldron-given power.",
+    'Cassian': "Becomes Nesta's mate by the book's end — his easy charm turns out to be covering real insecurity about his status as a \"lesser\" Illyrian, which Nesta is the first to call out. Nearly dies breaking Briallyn's mind control rather than harm her.",
+    'Feyre Archeron': "A supporting presence for most of the book, focused on reconciling with Nesta — until a dangerous premature labor puts her, Rhys, and their newborn son at the center of the real climax.",
+    'Elain Archeron': "Continues healing quietly in the background, her own arc still not the book's focus."
+  }
+];
+
+// Where We Are — locations & atmosphere per book, parallel structure to the Cast panel
+const settingByBook = [
+  "Mostly set at the Spring Court — a manor surrounded by lush, permanently blooming gardens that feel beautiful and a little eerie once you realize they're cursed to never change season. The tone shifts hard partway through: a slow, sensory, almost fairy-tale atmosphere turns dark and claustrophobic once the story moves Under the Mountain — a literal underground court of cold stone and firelight, where Amarantha holds her trials.",
+  "Splits between the Spring Court — which now feels more like a cage than a home — and the Night Court's two very different faces: Velaris, a hidden city of art and starlight that's nothing like the court's menacing reputation elsewhere, and the House of Wind, a mountain stronghold reachable only by flight. This is where the series gets its signature \"night sky\" identity — moody and romantic, but genuinely warm once you're inside Velaris's walls.",
+  "Covers the most ground of any book so far — the Spring Court, the human lands, and eventually full-scale battlefields as the coalition musters against Hybern. The mood matches: tense and mobile, growing grimmer as the war escalates, with brief pockets of found-family warmth back at the Night Court in between.",
+  "Almost entirely set in Velaris during the Winter Solstice — snow, candlelight, markets, quiet domestic scenes. By far the lightest, coziest atmosphere in the series so far; genuinely holiday-book energy after three books of escalating darkness.",
+  "Centers on the House of Wind and its training rings, with Nesta largely cut off from the world she used to know. Heavier and more claustrophobic than IV's warmth — much of the book plays out in small, tense spaces (training rings, a cramped cottage, Nesta's own head) before finally opening back out as she starts to heal."
+];
+
+// Small, curated crossover flags — see the "Beyond Prythian" panel for the full note.
+const crossoverByBook = {
+  1: "&#10022; This is the Velaris that Bryce Quinlan (Crescent City) will one day step into through a gate — see \u201cBeyond Prythian.\u201d",
+  4: "&#10022; A winged Fae male and his pregnant wife are glimpsed from another world in Kingdom of Ash (Throne of Glass) — years before this pregnancy was written. See \u201cBeyond Prythian.\u201d"
+};
+
+// Full cross-book Character Arcs — General + one distinct facet per character, spanning all 5 books
+const characterArcs = {
+  'Feyre Archeron': {
+    kind: 'person',
+    general: "Feyre begins the series as a human huntress defined by duty — surviving, feeding her family, expecting nothing from faeries but cruelty. Taken to the Spring Court in book one, she falls for Tamlin and, by the end of the book, sacrifices her own life to save him and break Amarantha's curse — resurrected as High Fae by all seven High Lords.\n\nBook two undoes that fairy-tale ending on purpose: Feyre returns changed, hollowed out by trauma, and instead of being helped, she's confined by Tamlin's fear-driven protectiveness. Her real arc in this book is reclaiming agency — training her new powers, discovering the truth of her bond with Rhysand, and ultimately choosing him. By its end, she's secretly married Rhys and become High Lady, then staged a devastating ruse to protect her new family: faking reconciliation with Tamlin and returning to Spring Court as a hidden spy.\n\nBook three is where that double life pays off — she's no longer just surviving events, she's shaping them, running an intelligence operation that helps win a war, until her marriage and title finally become public knowledge rather than a secret.\n\nIn books four and five, her role shifts to supporting — present, but no longer the central engine of the story, as focus moves to her sister Nesta. It's a natural handoff: Feyre's arc, from a girl who did what she had to survive to a leader who chooses her own path, is essentially complete by the end of book three.",
+    facetLabel: 'Emotional Arc',
+    facet: "The clearest throughline across Feyre's five books isn't her powers or her romance — it's her relationship with control and safety. Book one is about surviving on nerve; book two is about the cost of that survival, played out as unaddressed trauma that nearly costs her everything with Tamlin. The turning point isn't a battle, it's being around people — Rhys's inner circle — who don't need her to perform being fine.\n\nBy book three, she's channeling that same intensity into something chosen rather than forced — spywork, war, leadership. Her healing was never fully 'resolved' on-page; it's implied through action, through her being capable of things book-one Feyre couldn't have done. That's arguably why her story steps back in books four and five: there's not much further for that specific arc to go without repeating itself."
+  },
+  'Rhysand': {
+    kind: 'person',
+    general: "Rhysand is introduced in book one almost entirely through Feyre's fear and suspicion — a High Lord with a cruel reputation, striking a bargain with unclear motives. Nothing in book one asks you to trust him, and that's deliberate.\n\nBook two is where his arc actually begins, retroactively: it's revealed that everything unsettling about him in book one was concealment, not cruelty — protecting Feyre from Amarantha by hiding their mating bond, even at cost to his own reputation. He spends the book earning back trust he never technically betrayed, and by its end he's secretly married Feyre and made her High Lady.\n\nBy book three, that trust is fully tested rather than just established: he dies reforging the shattered Cauldron to save everyone in the war's climax, and is brought back by the other High Lords the same way Feyre once was. It's the moment his bond with Feyre stops being something either of them has to hide.",
+    facetLabel: 'Reputation vs. Reality',
+    facet: "Rhysand's whole introduction is built on a gap between what people believe about him and what's actually true — and the series makes you feel that gap by putting you inside Feyre's very justified suspicion in book one, rather than telling you upfront that he's one of the good guys.\n\nThe reveal in book two isn't just a plot twist, it's the point: his 'cruel' bargain was protection, and his reputation as the frightening High Lord of the Night Court is partly real — he does hold real, dangerous power — and partly a shield he's let stand because it's useful. By book three, when he gives his own life reforging the Cauldron to save people who once feared him, the gap between reputation and reality closes for good — the power was always real, but so, it turns out, was the sacrifice."
+  },
+  'Nesta Archeron': {
+    kind: 'person',
+    general: "Nesta barely exists as a character until book two, when she and Elain are forced into the Cauldron against their will and turned High Fae — an event that defines everything about her going forward, even though she has almost no say in it.\n\nBooks two and three show her response to that violation: fury, refusal, closing herself off from everyone, most visibly the Night Court she blames for what happened to her family. Book four makes that response impossible to ignore — she's drinking heavily, isolating, clearly in crisis, until the people around her finally agree to intervene.\n\nBook five is entirely hers: forced into structure and training under Cassian, she befriends two women, Gwyn and Emerie, and slowly finds purpose that has nothing to do with being someone's problem to manage. Her real turning point isn't the romance with Cassian, though that's part of it — it's her unique connection to the Cauldron, which lets her destroy the book's antagonist and, in the climax, save Feyre, Rhys, and their newborn son from a dangerous premature birth, at the cost of giving back most of that power. By the end, she's rebuilding trust with her family on her own terms, not because anyone demanded it.",
+    facetLabel: 'Emotional Arc',
+    facet: "Nesta's arc is the series' clearest study of what happens when trauma isn't allowed a say in its own timeline. She didn't choose to become Fae, didn't choose the war, didn't choose any of the losses that came before it — and books two through four show her responding to that lack of choice the only way she has left: refusal. Refusing gratitude, refusing help, refusing to perform being okay for anyone else's comfort.\n\nWhat makes book five work is that her healing isn't framed as 'getting over it' — it's framed as finding one thing entirely hers, chosen rather than assigned. The romance with Cassian matters, but it's not what fixes her; it's what she has room for once she's already begun choosing things for herself again."
+  },
+  'Cassian': {
+    kind: 'person',
+    general: "Cassian appears from book two onward as Rhysand's general and closest friend — loud, warm, easy company, introduced mostly through his loyalty to the Inner Circle rather than any personal struggle of his own.\n\nBook three gives him a real function beyond charm: he fights in the war, and his early friction with Nesta gets properly established, though neither of them would call it anything yet. Book four keeps him mostly in a supporting role, present for the family's attempt at normalcy during the Solstice.\n\nBook five is where he actually gets an arc of his own: paired with training Nesta, his easy confidence turns out to be covering something — insecurity about his status as a lower-born Illyrian in a rigidly hierarchical warrior culture. When the book's antagonist mind-controls him and orders him to kill Nesta, he stabs himself rather than harm her — the clearest possible proof that the insecurity was never the whole story. Nesta is the first person who doesn't let him hide behind charm, and by the book's end, their bond as mates is less about her being fixed by him and more about both of them being seen without the performance.",
+    facetLabel: 'Identity Arc',
+    facet: "Underneath Cassian's warmth is a detail easy to miss if you're only tracking the romance: he's a bastard-born Illyrian, from a culture that ranks its warriors by bloodline, and his charm functions partly as armor against that status. Books two and three don't dwell on this, but it's there — the loudest person in the room isn't always the most secure one.\n\nBook five is the first time this actually gets examined directly, because Nesta — herself allergic to people performing being fine — doesn't let him deflect it with jokes the way everyone else does. His arc isn't really about becoming a different person; it's about being fully seen as the one he already was, insecurity included, by someone who refuses to let him hide it."
+  },
+  'Elain & Lucien': {
+    kind: 'pair',
+    general: "Their bond starts almost entirely one-sided and unspoken. Lucien is introduced in book one as Tamlin's loyal, wry emissary — nothing about him points toward Elain, who doesn't even appear as a real character until book two, when she and Nesta are forced into the Cauldron against their will.\n\nBook three is where the mating bond between them first surfaces — but crucially, it surfaces as something imposed on both of them by circumstance, not chosen. Elain, freshly and violently transformed into a life she never wanted, isn't remotely ready to engage with it, and the book respects that by leaving it unresolved rather than rushing toward romance.\n\nBook four continues that patience: Elain heals at her own pace, gardening, quietly finding herself, while her bond to Lucien simply sits there — present, acknowledged, untouched. Book five keeps the focus on Nesta, so Elain and Lucien's relationship stays exactly where it was: real, mutual on some level, and still entirely unresolved by the end of book five. This is one of the more clearly unfinished threads heading into book six — worth knowing you're not missing a resolution that already happened."
+  }
+};
+
+const depthOrder = ['high', 'timeline', 'detailed', 'character', 'situation'];
+const depthLabels = { high: 'High-Level', timeline: 'Timeline', detailed: 'Detailed', character: 'Character Focus', situation: 'Situation Focus' };
+const depthDescriptions = {
+  high: "The whole book in a few sentences — the headline, nothing else.",
+  timeline: "The story itself, beat by beat, in the order it happens — a walkthrough, not a summary.",
+  detailed: "The full picture, organized by why things matter — situation, key turning points, relationships, what's unresolved.",
+  character: "Follow one character's arc through this book, or see everyone's shifts at once.",
+  situation: "Zoomed in on the single moment of this book most worth remembering."
+};
+
+let currentBook = 0;
+let currentMode = 'read';
+let currentDepth = 'detailed';
+let currentCharacter = 'combined';
+let helperOpen = false;
+
+const helperOptions = [
+  { label: "Just remind me quickly", depth: 'high' },
+  { label: "Walk me through it, start to finish", depth: 'timeline' },
+  { label: "Give me the full, organized picture", depth: 'detailed' },
+  { label: "I care about a character's arc", depth: 'character' },
+  { label: "One key moment, in depth", depth: 'situation' }
+];
+
+// ---- Audio (Web Speech API) ----
+const synth = window.speechSynthesis;
+let voices = [];
+function loadVoices() { voices = synth.getVoices(); }
+if (synth) {
+  synth.onvoiceschanged = loadVoices;
+  loadVoices();
+}
+let isSpeaking = false;
+let isPaused = false;
+let currentLines = [];
+let currentLineIdx = 0;
+
+function pickVoice(who) {
+  const en = voices.filter(v => v.lang && v.lang.startsWith('en'));
+  const pool = en.length >= 2 ? en : voices;
+  if (pool.length === 0) return null;
+  return who === 'wren' ? pool[0] : pool[pool.length - 1];
+}
+
+function highlightLine(idx) {
+  document.querySelectorAll('.line').forEach((el, i) => {
+    el.classList.toggle('speaking', i === idx);
+  });
+}
+
+function updatePlayerUI() {
+  const btn = document.getElementById('playBtn');
+  if (!btn) return;
+  if (isSpeaking && !isPaused) btn.textContent = '\u23F8 Pause';
+  else if (isSpeaking && isPaused) btn.textContent = '\u25B6 Resume';
+  else btn.textContent = '\u25B6 Play aloud';
+}
+
+function speakNext() {
+  if (currentLineIdx >= currentLines.length) {
+    isSpeaking = false; isPaused = false;
+    updatePlayerUI(); highlightLine(-1);
+    return;
+  }
+  const line = currentLines[currentLineIdx];
+  highlightLine(currentLineIdx);
+  const utter = new SpeechSynthesisUtterance(line.text);
+  const v = pickVoice(line.who);
+  if (v) utter.voice = v;
+  utter.pitch = line.who === 'wren' ? 1.1 : 0.8;
+  utter.rate = 1;
+  utter.onend = () => { currentLineIdx++; speakNext(); };
+  synth.speak(utter);
+}
+
+function startScript() {
+  synth.cancel();
+  currentLines = books[currentBook].depths[currentDepth].listen;
+  currentLineIdx = 0;
+  isSpeaking = true; isPaused = false;
+  updatePlayerUI();
+  speakNext();
+}
+
+function togglePlay() {
+  if (!isSpeaking) {
+    startScript();
+  } else if (isPaused) {
+    synth.resume(); isPaused = false; updatePlayerUI();
+  } else {
+    synth.pause(); isPaused = true; updatePlayerUI();
+  }
+}
+
+function stopScript() {
+  synth.cancel();
+  isSpeaking = false; isPaused = false;
+  updatePlayerUI(); highlightLine(-1);
+}
+
+// ---- Rendering ----
+function renderTabs() {
+  const nav = document.getElementById('bookTabs');
+  nav.innerHTML = books.map((b, i) => `
+    <button class="book-tab ${i === currentBook ? 'active' : ''}" data-idx="${i}">
+      <span class="numeral">${b.numeral}</span>
+      <span class="label">${b.label}</span>
+    </button>
+  `).join('');
+  nav.querySelectorAll('.book-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      stopScript();
+      currentBook = parseInt(btn.dataset.idx);
+      currentCharacter = 'combined';
+      helperOpen = false;
+      renderTabs();
+      renderContent();
+      renderCast();
+      renderSetting();
+      renderHelper();
+    });
+  });
+}
+
+function renderHelper() {
+  const wrap = document.getElementById('helper-wrap');
+  const book = books[currentBook];
+  if (!helperOpen) {
+    wrap.innerHTML = `<button class="helper-link" id="helperOpenBtn">Not sure what you need for Book ${book.numeral}? Help me choose &rarr;</button>`;
+    document.getElementById('helperOpenBtn').addEventListener('click', () => {
+      helperOpen = true;
+      renderHelper();
+    });
+  } else {
+    wrap.innerHTML = `
+      <div class="helper-card">
+        <p class="helper-q">What are you looking for in ${book.title}?</p>
+        <div class="helper-options">
+          ${helperOptions.map(o => `<button class="helper-option" data-depth="${o.depth}">${o.label}</button>`).join('')}
+        </div>
+        <button class="helper-close" id="helperCloseBtn">Never mind</button>
+      </div>
+    `;
+    wrap.querySelectorAll('.helper-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        stopScript();
+        currentDepth = btn.dataset.depth;
+        currentCharacter = 'combined';
+        helperOpen = false;
+        renderDepthToggle();
+        renderContent();
+        renderHelper();
+      });
+    });
+    document.getElementById('helperCloseBtn').addEventListener('click', () => {
+      helperOpen = false;
+      renderHelper();
+    });
+  }
+}
+
+function renderDepthToggle() {
+  const wrap = document.getElementById('depthToggle');
+  wrap.innerHTML = depthOrder.map(d => `
+    <button class="depth-btn ${d === currentDepth ? 'active' : ''}" data-depth="${d}">${depthLabels[d]}</button>
+  `).join('');
+  document.getElementById('depthDescription').textContent = depthDescriptions[currentDepth];
+  wrap.querySelectorAll('.depth-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      stopScript();
+      currentDepth = btn.dataset.depth;
+      currentCharacter = 'combined';
+      renderDepthToggle();
+      renderContent();
+    });
+  });
+}
+
+function renderParas(text) {
+  return text.split('\n\n').map(p => `<p>${p}</p>`).join('');
+}
+
+function characterNamesForCurrentBook() {
+  const bookCast = castByBook[currentBook];
+  const names = [...bookCast.fresh, ...bookCast.returning.map(r => r.name)];
+  return [...new Set(names)];
+}
+
+function renderContent() {
+  const book = books[currentBook];
+  const depth = book.depths[currentDepth];
+
+  document.getElementById('bookHeading').innerHTML = `
+    <h2>${book.title}</h2>
+    <p>Book ${book.numeral} &middot; ${depthLabels[currentDepth]} &middot; ${currentMode === 'read' ? 'Written' : 'Audio'}</p>
+  `;
+
+  const content = document.getElementById('content');
+
+  if (currentMode === 'read') {
+    if (currentDepth === 'detailed') {
+      const d = depth.read;
+      content.innerHTML = `
+        <div class="card"><h3>The Situation</h3>${renderParas(d.situation)}</div>
+        <div class="card"><h3>What Happens</h3><ul>${d.events.map(e => `<li>${e}</li>`).join('')}</ul></div>
+        <div class="card"><h3>Where Hearts Stand</h3>${renderParas(d.relationships)}</div>
+        <div class="card cliffhanger"><h3>Where It Left Off</h3><p>${d.cliffhanger}</p></div>
+      `;
+    } else if (currentDepth === 'timeline') {
+      content.innerHTML = `
+        <div class="card">
+          <div class="timeline-track">
+            ${depth.read.map(item => `
+              ${item.phase ? `<p class="timeline-phase-label">${item.phase}</p>` : ''}
+              <div class="timeline-item"><span class="timeline-dot"></span><p>${item.text}</p></div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else if (currentDepth === 'character') {
+      const names = characterNamesForCurrentBook();
+      const chips = ['combined', ...names];
+      const text = currentCharacter === 'combined'
+        ? depth.read
+        : (characterThreadByBook[currentBook][currentCharacter] || depth.read);
+      content.innerHTML = `
+        <div class="char-chip-row">
+          ${chips.map(c => `
+            <button class="char-chip ${c === currentCharacter ? 'active' : ''}" data-char="${c}">${c === 'combined' ? 'Combined' : c}</button>
+          `).join('')}
+        </div>
+        <div class="card">${renderParas(text)}</div>
+      `;
+      content.querySelectorAll('.char-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentCharacter = btn.dataset.char;
+          renderContent();
+        });
+      });
+    } else {
+      content.innerHTML = `<div class="card">${renderParas(depth.read)}</div>`;
+    }
+  } else {
+    const lines = depth.listen;
+    content.innerHTML = `
+      <div class="player-bar">
+        <button class="player-btn" id="playBtn">\u25B6 Play aloud</button>
+        <button class="player-btn stop" id="stopBtn">\u23F9 Stop</button>
+      </div>
+      <p class="player-note">Uses your browser's built-in voices &mdash; quality varies by device.</p>
+      <div class="card">
+        <div class="transcript">
+          ${lines.map(line => `
+            <div class="line ${line.who}">
+              <span class="speaker">${line.who === 'wren' ? 'Wren' : 'Sol'}</span>
+              <div class="bubble">${line.text}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    document.getElementById('playBtn').addEventListener('click', togglePlay);
+    document.getElementById('stopBtn').addEventListener('click', stopScript);
+    updatePlayerUI();
+  }
+}
+
+function renderCast() {
+  const panel = document.getElementById('cast-panel');
+  const book = books[currentBook];
+  const bookCast = castByBook[currentBook];
+
+  const freshHtml = bookCast.fresh.length
+    ? bookCast.fresh.map(name => {
+        const c = castMaster[name];
+        return `
+          <div class="cast-card">
+            <p class="name">${name}</p>
+            <p class="role">${c.role}</p>
+            <p class="trait">${c.trait}</p>
+            <p class="note">${c.note}</p>
+          </div>
+        `;
+      }).join('')
+    : `<p class="cast-empty">No new characters introduced in Book ${book.numeral} — this one's about the cast you already know.</p>`;
+
+  const returningHtml = bookCast.returning.length
+    ? bookCast.returning.map(r => `
+        <div class="returning-row">
+          <span class="rname">${r.name}</span>
+          <span class="rchange">${r.change}</span>
+        </div>
+      `).join('')
+    : `<p class="cast-empty">Nobody returning yet — this is the first book.</p>`;
+
+  panel.innerHTML = `
+    <p class="cast-section-label">New in Book ${book.numeral}</p>
+    ${freshHtml}
+    <p class="cast-section-label">Returning — what's changed</p>
+    ${returningHtml}
+  `;
+}
+
+function renderSetting() {
+  const panel = document.getElementById('setting-panel');
+  const book = books[currentBook];
+  const crossover = crossoverByBook[currentBook];
+  panel.innerHTML = `
+    <p class="cast-section-label">Where We Are — Book ${book.numeral}</p>
+    <div class="card">
+      <p>${settingByBook[currentBook]}</p>
+      ${crossover ? `<span class="crossover-note">${crossover}</span>` : ''}
+    </div>
+  `;
+}
+
+// Character Arcs — series-wide, independent of the currently selected book
+const arcNames = Object.keys(characterArcs);
+let currentArcPerson = arcNames[0];
+let currentArcFacet = 'general';
+
+function renderArcs() {
+  const panel = document.getElementById('arcs-panel');
+  const arc = characterArcs[currentArcPerson];
+
+  const personRow = `
+    <div class="arc-person-row">
+      ${arcNames.map(name => `
+        <button class="arc-person-chip ${name === currentArcPerson ? 'active' : ''}" data-name="${name}">${name === 'Elain & Lucien' ? 'Elain & Lucien' : name.split(' ')[0]}</button>
+      `).join('')}
+    </div>
+  `;
+
+  let facetRow = '';
+  let body = '';
+  if (arc.kind === 'person') {
+    facetRow = `
+      <div class="arc-facet-row">
+        <button class="arc-facet-btn ${currentArcFacet === 'general' ? 'active' : ''}" data-facet="general">General Arc</button>
+        <button class="arc-facet-btn ${currentArcFacet === 'facet' ? 'active' : ''}" data-facet="facet">${arc.facetLabel}</button>
+      </div>
+    `;
+    body = renderParas(currentArcFacet === 'general' ? arc.general : arc.facet);
+  } else {
+    body = renderParas(arc.general);
+  }
+
+  panel.innerHTML = `
+    <p class="cast-section-label">Character Arcs — across all five books</p>
+    ${personRow}
+    ${facetRow}
+    <div class="card">${body}</div>
+  `;
+
+  panel.querySelectorAll('.arc-person-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentArcPerson = btn.dataset.name;
+      currentArcFacet = 'general';
+      renderArcs();
+    });
+  });
+  panel.querySelectorAll('.arc-facet-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentArcFacet = btn.dataset.facet;
+      renderArcs();
+    });
+  });
+}
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    stopScript();
+    currentMode = btn.dataset.mode;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderContent();
+  });
+});
+
+document.getElementById('cast-toggle').addEventListener('click', () => {
+  const panel = document.getElementById('cast-panel');
+  panel.classList.toggle('hidden');
+  document.getElementById('cast-toggle').textContent = panel.classList.contains('hidden')
+    ? "Open the Cast — who's who"
+    : "Close the Cast";
+});
+
+document.getElementById('setting-toggle').addEventListener('click', () => {
+  const panel = document.getElementById('setting-panel');
+  panel.classList.toggle('hidden');
+  document.getElementById('setting-toggle').textContent = panel.classList.contains('hidden')
+    ? "Where We Are"
+    : "Close the Setting";
+});
+
+document.getElementById('beyond-toggle').addEventListener('click', () => {
+  const panel = document.getElementById('beyond-panel');
+  panel.classList.toggle('hidden');
+  document.getElementById('beyond-toggle').textContent = panel.classList.contains('hidden')
+    ? "Beyond Prythian"
+    : "Close Beyond Prythian";
+});
+
+let currentView = 'book';
+function setView(view) {
+  currentView = view;
+  stopScript();
+  document.getElementById('book-view-wrap').classList.toggle('hidden', view !== 'book');
+  document.getElementById('arcs-view-wrap').classList.toggle('hidden', view !== 'arcs');
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  if (view === 'arcs') renderArcs();
+}
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', () => setView(btn.dataset.view));
+});
+
+renderTabs();
+renderDepthToggle();
+renderContent();
+renderCast();
+renderSetting();
+renderHelper();
+setView('book');
+</script>
+</body>
+</html>
