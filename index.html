@@ -99,6 +99,29 @@
   #setting-panel.hidden { display: none; }
   #setting-panel .card p { margin: 0; }
 
+  .beyond-toggle-wrap { text-align: center; margin: 0 0 22px; }
+  #beyond-toggle {
+    background: none; border: 1px solid var(--border); color: var(--gold-soft);
+    padding: 10px 22px; border-radius: 20px; font-family: 'Inter', sans-serif;
+    font-size: 13px; cursor: pointer; transition: all 0.2s;
+  }
+  #beyond-toggle:hover { background: var(--bg-surface); }
+  #beyond-panel { margin: -8px 0 28px; }
+  #beyond-panel.hidden { display: none; }
+  .beyond-card {
+    max-width: 560px; margin: 0 auto 12px; background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 18px;
+  }
+  .bp-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; color: var(--gold-soft); margin: 0 0 3px; }
+  .bp-source { font-size: 11px; color: var(--text-muted); letter-spacing: 0.3px; margin: 0 0 8px; text-transform: uppercase; }
+  .beyond-card p:not(.bp-name):not(.bp-source) { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin: 0; }
+  .beyond-card em { color: var(--text-primary); font-style: italic; }
+  .bp-footnote { max-width: 560px; margin: 10px auto 0; text-align: center; font-size: 12px; color: var(--text-muted); font-style: italic; font-family: 'Cormorant Garamond', serif; }
+  .crossover-note {
+    display: block; margin-top: 8px; padding: 8px 12px; border-left: 2px solid var(--gold-soft);
+    background: rgba(201,162,39,0.08); font-size: 12.5px; color: var(--text-muted); font-style: italic; line-height: 1.5;
+  }
+
   .arc-person-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 14px; }
   .arc-person-chip {
     background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-muted);
@@ -313,6 +336,27 @@
   <div class="view-switch" id="viewSwitch">
     <button class="view-btn active" data-view="book">Explore a Book</button>
     <button class="view-btn" data-view="arcs">Follow a Character</button>
+  </div>
+
+  <div class="beyond-toggle-wrap">
+    <button id="beyond-toggle">Beyond Prythian</button>
+  </div>
+  <div id="beyond-panel" class="hidden">
+    <p class="cast-section-label" style="text-align:center; display:block;">Small nods to the wider Maasverse</p>
+    <p style="text-align:center; font-size:12.5px; color:var(--text-muted); font-style:italic; font-family:'Cormorant Garamond',serif; margin:4px 0 16px;">
+      Throne of Glass and Crescent City live outside these five ACOTAR books. Treat the Crescent City one as a light spoiler for that series.
+    </p>
+    <div class="beyond-card">
+      <p class="bp-name">Bryce Quinlan arrives in Prythian</p>
+      <p class="bp-source">Crescent City, Book 2 (House of Sky and Breath) &amp; Book 3 (House of Flame and Shadow)</p>
+      <p>At the end of <em>House of Sky and Breath</em>, Bryce Quinlan steps through a gate to escape her own world — and lands in the Night Court, face to face with Rhysand and Azriel. It isn't a wink or a cameo; she's really there, and <em>House of Flame and Shadow</em> follows her through Prythian as she learns her own "starborn" power connects to magic that runs through this world too.</p>
+    </div>
+    <div class="beyond-card">
+      <p class="bp-name">A glimpse at Starfall</p>
+      <p class="bp-source">Throne of Glass, Book 7 (Kingdom of Ash)</p>
+      <p>While falling between worlds, Aelin glimpses a winged Fae male embracing his pregnant wife. Readers have long read this as Rhysand and Feyre — and the detail is stranger for the timing: <em>Kingdom of Ash</em> published years before <em>A Court of Silver Flames</em> confirmed Feyre's pregnancy with Nyx.</p>
+    </div>
+    <p class="bp-footnote">This is a small, curated set — not a full map of the Maasverse. Watch for a &#10022; note where these moments connect to something in Prythian's own story.</p>
   </div>
 
   <div id="book-view-wrap">
@@ -860,6 +904,12 @@ const settingByBook = [
   "Centers on the House of Wind and its training rings, with Nesta largely cut off from the world she used to know. Heavier and more claustrophobic than IV's warmth — much of the book plays out in small, tense spaces (training rings, a cramped cottage, Nesta's own head) before finally opening back out as she starts to heal."
 ];
 
+// Small, curated crossover flags — see the "Beyond Prythian" panel for the full note.
+const crossoverByBook = {
+  1: "&#10022; This is the Velaris that Bryce Quinlan (Crescent City) will one day step into through a gate — see \u201cBeyond Prythian.\u201d",
+  4: "&#10022; A winged Fae male and his pregnant wife are glimpsed from another world in Kingdom of Ash (Throne of Glass) — years before this pregnancy was written. See \u201cBeyond Prythian.\u201d"
+};
+
 // Full cross-book Character Arcs — General + one distinct facet per character, spanning all 5 books
 const characterArcs = {
   'Feyre Archeron': {
@@ -1198,9 +1248,13 @@ function renderCast() {
 function renderSetting() {
   const panel = document.getElementById('setting-panel');
   const book = books[currentBook];
+  const crossover = crossoverByBook[currentBook];
   panel.innerHTML = `
     <p class="cast-section-label">Where We Are — Book ${book.numeral}</p>
-    <div class="card"><p>${settingByBook[currentBook]}</p></div>
+    <div class="card">
+      <p>${settingByBook[currentBook]}</p>
+      ${crossover ? `<span class="crossover-note">${crossover}</span>` : ''}
+    </div>
   `;
 }
 
@@ -1281,6 +1335,14 @@ document.getElementById('setting-toggle').addEventListener('click', () => {
   document.getElementById('setting-toggle').textContent = panel.classList.contains('hidden')
     ? "Where We Are"
     : "Close the Setting";
+});
+
+document.getElementById('beyond-toggle').addEventListener('click', () => {
+  const panel = document.getElementById('beyond-panel');
+  panel.classList.toggle('hidden');
+  document.getElementById('beyond-toggle').textContent = panel.classList.contains('hidden')
+    ? "Beyond Prythian"
+    : "Close Beyond Prythian";
 });
 
 let currentView = 'book';
